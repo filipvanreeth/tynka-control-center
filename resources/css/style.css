@@ -1,0 +1,62 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Quicksand:wght@300..700&display=swap'); */
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+/* @import @fontsource-variable/inter; */
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: Inter, sans-serif;
+  --font-display--font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  --font-display--font-variation-settings: "opsz" 32;
+  /* Colors */
+  --color-cgreen: #a3cac4;
+  --color-cblue: #bbdefb;
+  --color-cpurple: #c4d4e5;
+
+  --color-opal-50: oklch(0.409 0.021 184.938);
+  --color-opal-100: oklch(0.477 0.025 184.938);
+  --color-opal-200: oklch(0.544 0.028 184.938);
+  --color-opal-300: oklch(0.612 0.032 184.938);
+  --color-opal-500: oklch(0.68 0.035 184.938);
+  --color-opal-700: oklch(0.747 0.039 184.938);
+  --color-opal-800: oklch(0.815 0.043 184.938);
+  --color-opal-900: oklch(0.882 0.046 184.938);
+  --color-opal-950: oklch(0.95 0.021 184.938);
+
+  --color-periwinkle-50: oklch(0.463 0.054 249.792);
+  --color-periwinkle-100: oklch(0.524 0.062 249.792);
+  --color-periwinkle-200: oklch(0.585 0.069 249.792);
+  --color-periwinkle-300: oklch(0.646 0.076 249.792);
+  --color-periwinkle-500: oklch(0.707 0.067 249.792);
+  --color-periwinkle-700: oklch(0.767 0.052 249.792);
+  --color-periwinkle-800: oklch(0.828 0.037 249.792);
+  --color-periwinkle-900: oklch(0.889 0.023 249.792);
+  --color-periwinkle-950: oklch(0.95 0.01 249.792);
+
+  --color-dairy-cream-50: #fef8ee;
+  --color-dairy-cream-100: #fdf0d7;
+  --color-dairy-cream-200: #fbe4bd;
+  --color-dairy-cream-300: #f7c67a;
+  --color-dairy-cream-400: #f2a345;
+  --color-dairy-cream-500: #ee8821;
+  --color-dairy-cream-600: #e06e16;
+  --color-dairy-cream-700: #ba5414;
+  --color-dairy-cream-800: #944318;
+  --color-dairy-cream-900: #773817;
+  --color-dairy-cream-950: #401b0a;
+}
+
+:root {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-font-smoothing: antialiased;
+  -o-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+body {
+  /* @apply font-sans antialiased text-gray-900; */
+}

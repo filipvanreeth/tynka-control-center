@@ -1,0 +1,43 @@
+name: tynka-control-center
+recipe: lemp
+config:
+  composer_version: "2"
+  php: "8.3"
+  webroot: public
+  xdebug: "debug,develop"
+  config:
+    php: .lando-dev/php.ini
+services:
+  appserver:
+    type: php:8.3
+    build_as_root:
+      - apt-get update -y && apt-get install -y sqlite3 libsqlite3-dev
+      # - a2enmod headers
+    # overrides:
+    #   environment:
+    #     - COMPOSER_MEMORY_LIMIT=-1
+    #     - PHP_MEMORY_LIMIT=512M
+    #     - PHP_MAX_EXECUTION_TIME=300
+    #   services:
+    #     ports:
+    #       - "8080:80"
+    #       - "8443:443"
+  node:
+    type: node:20
+  database:
+    type: mysql:8.0
+    portforward: true
+    creds:
+      user: admin
+      password: admin
+      database: tynka_control_center
+# proxy:
+#   appserver:
+#     - tynka-walks-nfc.lndo.site
+tooling:
+  npm:
+    service: node
+  npx:
+    service: node
+  node:
+    service: node
