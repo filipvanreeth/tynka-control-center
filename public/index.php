@@ -5,6 +5,7 @@ use TynkaControlCenter\Presentation\ViewRenderer;
 use \TynkaControlCenter\Services\CheckInService;
 use \TynkaControlCenter\Services\TranslationService;
 use \TynkaControlCenter\Controllers\CheckInController;
+use \TynkaControlCenter\Core\Vite;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -14,12 +15,20 @@ $dotenv->load();
 $appConfig = new \TynkaControlCenter\Config\AppConfig(
     appUrl: $_ENV['APP_URL'] ?? 'http://localhost:80',
     appVersion: '0.1.9',
+    appEnvironment: $_ENV['APP_ENVIRONMENT'] ?? 'production',
     dbDriver: $_ENV['DB_DRIVER'] ?? 'sqlite',
     dbDatabase: __DIR__ . '/../storage/database.sqlite',
+    viteDevelopmentServerUrl: $_ENV['VITE_DEVELOPMENT_SERVER_URL'] ?? false,
 );
 
 define('BASE_PATH', dirname(__DIR__));
 define('VIEW_PATH', BASE_PATH . '/resources/views/');
+
+$vite = new Vite(
+    publicPath: BASE_PATH . '/public',
+    isDevelopment: false,
+    developmentServerUrl: $_ENV['VITE_DEVELOPMENT_SERVER_URL'] ?? 'http://localhost:5173'
+);
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

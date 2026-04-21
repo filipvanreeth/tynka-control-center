@@ -31,9 +31,11 @@ services:
       user: admin
       password: admin
       database: tynka_control_center
-# proxy:
-#   appserver:
-#     - tynka-walks-nfc.lndo.site
+proxy:
+  # appserver:
+  #   - tynka-control-center.lndo.site
+  node:
+    - vite.tynka-control-center.lndo.site:5173
 tooling:
   npm:
     service: node

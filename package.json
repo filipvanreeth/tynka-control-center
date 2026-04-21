@@ -1,4 +1,14 @@
 {
+  "name": "tynka-control-center",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
     "@tailwindcss/cli": "^4.2.2",

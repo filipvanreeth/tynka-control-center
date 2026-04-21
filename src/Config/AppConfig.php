@@ -10,6 +10,8 @@ final class AppConfig
         public readonly string $appVersion,
         public readonly string $dbDriver,
         public readonly string $dbDatabase,
+        public readonly string $appEnvironment,
+        public readonly string $viteDevelopmentServerUrl,
         public readonly string $locale = 'en'
     ) {
     }
