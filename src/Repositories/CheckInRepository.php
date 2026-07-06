@@ -5,7 +5,7 @@ namespace TynkaControlCenter\Repositories;
 
 use DateTimeImmutable;
 use PDO;
-use TynkaControlCenter\Entities\CheckInEntity;
+use TynkaControlCenter\CheckIn\Domain\CheckIn;
 
 class CheckInRepository
 {
@@ -15,20 +15,20 @@ class CheckInRepository
     ) {
     }
 
-    public function storeCheckIn(CheckInEntity $checkIn): CheckInEntity
+    public function storeCheckIn(CheckIn $checkIn): CheckIn
     {
         $stmt = $this->pdo->prepare(
             "INSERT INTO {$this->tableName} (uuid, handler, peed, pooped, food, snack, created_at) VALUES (:uuid, :handler, :peed, :pooped, :food, :snack, :created_at)"
         );
 
         $data = [
-            ':uuid' => $checkIn->getUuid(),
-            ':handler' => $checkIn->getHandler(),
+            ':uuid' => $checkIn->uuid(),
+            ':handler' => $checkIn->handler(),
             ':peed' => $checkIn->hasPeed() ? 1 : 0,
             ':pooped' => $checkIn->hasPooped() ? 1 : 0,
             ':food' => $checkIn->hadFood() ? 1 : 0,
             ':snack' => $checkIn->hadSnack() ? 1 : 0,
-            ':created_at' => $checkIn->getCreatedAt()->format('Y-m-d H:i:s'),
+            ':created_at' => $checkIn->createdAt()->format('Y-m-d H:i:s'),
         ];
 
         $executed = $stmt->execute($data);
@@ -43,21 +43,23 @@ class CheckInRepository
         return $checkIn;
     }
 
-    public function findCheckInById(string $uuid): ?CheckInEntity
+    public function findByUuid(string $uuid): ?CheckIn
     {
         $stmt = $this->pdo->prepare(
-            "SELECT id FROM {$this->tableName} WHERE id = :id"
+            "SELECT * FROM {$this->tableName} WHERE uuid = :uuid"
         );
 
-        $stmt->execute([':id' => $uuid]);
+        $params = [':uuid' => $uuid];
+        
+        $stmt->execute([':uuid' => $uuid]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
+        
         if (!$row) {
             return null;
         }
 
-        return new CheckInEntity(
+        return new CheckIn(
             id: $row['id'],
             uuid: $row['uuid'],
             handler: $row['handler'],
@@ -80,19 +82,21 @@ class CheckInRepository
             return [];
         }
 
-        return array_map(fn($row) => new CheckInEntity(
-            id: $row['id'],
-            uuid: $row['uuid'],
-            handler: $row['handler'],
-            hasPeed: (bool) $row['peed'],
-            hasPooped: (bool) $row['pooped'],
-            hadFood: (bool) $row['food'],
-            hadSnack: (bool) $row['snack'],
-            createdAt: new DateTimeImmutable($row['created_at'])
-        ), $rows);
+        return array_map(
+            fn($row) => new CheckIn(
+                id: $row['id'],
+                uuid: $row['uuid'],
+                handler: $row['handler'],
+                hasPeed: (bool) $row['peed'],
+                hasPooped: (bool) $row['pooped'],
+                hadFood: (bool) $row['food'],
+                hadSnack: (bool) $row['snack'],
+                createdAt: new DateTimeImmutable($row['created_at'])
+            ), $rows
+        );
     }
 
-    public function findLatestCheckIn(): ?CheckInEntity
+    public function findLatestCheckIn(): ?CheckIn
     {
         $stmt = $this->pdo->query("SELECT * FROM {$this->tableName} ORDER BY created_at DESC LIMIT 1");
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -101,7 +105,7 @@ class CheckInRepository
             return null;
         }
 
-        return new CheckInEntity(
+        return new CheckIn(
             id: $row['id'],
             uuid: $row['uuid'],
             handler: $row['handler'],

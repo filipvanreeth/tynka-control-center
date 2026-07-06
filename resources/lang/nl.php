@@ -8,4 +8,8 @@ return [
         'food' => 'Voeding',
         'snack' => 'Snack'
     ],
+    'check_in_option_types' => [
+        'walking' => 'Wandelen',
+        'food' => 'Voeding',
+    ],
 ];

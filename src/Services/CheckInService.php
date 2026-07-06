@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace TynkaControlCenter\Services;
 
 use DateTimeImmutable;
-use TynkaControlCenter\Entities\CheckInEntity;
+use TynkaControlCenter\CheckIn\Domain\CheckIn;
 use TynkaControlCenter\Repositories\CheckInRepository;
 
 class CheckInService
@@ -23,11 +23,11 @@ class CheckInService
         bool $hadFood,
         bool $hadSnack,
         DateTimeImmutable $createdAt
-    ): CheckInEntity {
+    ): CheckIn {
         // $lastCheckIn = $this->checkinRepository->findLatestCheckIn();
 
         // if ($lastCheckIn === null) {
-        //     $checkIn = CheckInEntity::create(
+        //     $checkIn = CheckIn::create(
         //         handler: $handler,
         //         hasPeed: $hasPeed,
         //         hasPooped: $hasPooped,
@@ -49,7 +49,7 @@ class CheckInService
         //     ));
         // }
 
-        $checkIn = CheckInEntity::create(
+        $checkIn = CheckIn::create(
             handler: $handler,
             hasPeed: $hasPeed,
             hasPooped: $hasPooped,
@@ -61,9 +61,9 @@ class CheckInService
         return $this->checkinRepository->storeCheckIn($checkIn);
     }
 
-    public function getCheckInById(string $uuid): ?CheckInEntity
+    public function getCheckInById(string $uuid): ?CheckIn
     {
-        return $this->checkinRepository->findCheckInById($uuid);
+        return $this->checkinRepository->findByUuid($uuid);
     }
 
     public function getAllCheckIns(string $order = 'DESC', ?int $limit = null): array

@@ -1,15 +1,21 @@
 <?php
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Services;
+namespace TynkaControlCenter\Common\Infrastructure;
 
-final class TranslationService
+use TynkaControlCenter\Common\Domain\Translator;
+
+final class FileTranslator implements Translator
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $catalogueCache = [];
 
     public function __construct(
+        private readonly string $languagePath,
         private readonly string $defaultLocale = 'en',
-        private readonly string $fallbackLocale = 'en'
+        private readonly string $fallbackLocale = 'en',
     ) {
     }
 
@@ -40,13 +46,18 @@ final class TranslationService
         return str_replace('_', '-', $activeLocale);
     }
 
+    /**
+     * Summary of loadCatalogue
+     * @param string $locale
+     * @return array<string, mixed>
+     */
     private function loadCatalogue(string $locale): array
     {
-        if (array_key_exists($locale, $this->catalogueCache)) {
+        if (\array_key_exists($locale, $this->catalogueCache)) {
             return $this->catalogueCache[$locale];
         }
 
-        $path = dirname(__DIR__, 2) . "/resources/lang/{$locale}.php";
+        $path = "$this->languagePath/{$locale}.php";
 
         if (!file_exists($path)) {
             $this->catalogueCache[$locale] = [];
@@ -54,26 +65,31 @@ final class TranslationService
             return $this->catalogueCache[$locale];
         }
 
-        $catalogue = require $path;
+        $catalogue = include $path;
 
-        $this->catalogueCache[$locale] = is_array($catalogue) ? $catalogue : [];
+        $this->catalogueCache[$locale] = \is_array($catalogue) ? $catalogue : [];
 
         return $this->catalogueCache[$locale];
     }
 
+    /** 
+     * @param array<string, mixed> $catalogue The catalogue with translations.
+     * @param string $key Key to check.
+     * @return string|null Returns the value as a string or null if no string.
+     */
     private function resolve(array $catalogue, string $key): ?string
     {
         $segments = explode('.', $key);
         $value = $catalogue;
 
         foreach ($segments as $segment) {
-            if (!is_array($value) || !array_key_exists($segment, $value)) {
+            if (!\is_array($value) || !array_key_exists($segment, $value)) {
                 return null;
             }
 
             $value = $value[$segment];
         }
 
-        return is_string($value) ? $value : null;
+        return \is_string($value) ? $value : null;
     }
 }

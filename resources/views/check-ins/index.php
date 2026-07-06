@@ -20,8 +20,9 @@ echo $this->render('header');
 
         <div
             id="checkin-form-container" class="hidden"><?php echo $this->render('components/check-in-form', [
+                'form' => $form,
                 'checkInOptions' => $checkInOptions,
-                'handlers' => $handlers,
+                'handlers' => $handlerService->getAllHandlers(),
                 'flash' => $flash,
             ]) ?>
         </div>
@@ -38,9 +39,11 @@ echo $this->render('header');
         <div
             class="grid gap-4 mt-4">
             <?php foreach ($checkIns as $checkIn) {
+                var_dump($checkIn);
                 echo $this->render('components/check-in-card', [
                     'handlerService' => $handlerService,
-                    'checkIn' => $checkIn
+                    'checkIn' => $checkIn,
+                    'editLink' => "checkin/{$checkIn->uuid}/edit",
                 ]);
             }
             ?>

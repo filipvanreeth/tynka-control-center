@@ -1,21 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Entities;
+namespace TynkaControlCenter\CheckIn\Domain;
 
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 
-class CheckInEntity
+class CheckIn
 {
     public function __construct(
-        private ?int $id,
+        public ?int $id,
         public readonly string $uuid,
         public readonly string $handler,
         public readonly bool $hasPeed,
         public readonly bool $hasPooped,
         public readonly bool $hadFood,
         public readonly bool $hadSnack,
+        private array $options,
         public readonly DateTimeImmutable $createdAt
     ) {
     }
@@ -26,6 +27,7 @@ class CheckInEntity
         bool $hasPooped,
         bool $hadFood,
         bool $hadSnack,
+        array $options,
         DateTimeImmutable $createdAt
     ): self {
         return new self(
@@ -36,11 +38,12 @@ class CheckInEntity
             hasPooped: $hasPooped,
             hadFood: $hadFood,
             hadSnack: $hadSnack,
+            options: $options,
             createdAt: $createdAt
         );
     }
     
-    public function getId(): ?int
+    public function id(): ?int
     {
         return $this->id;
     }
@@ -50,12 +53,12 @@ class CheckInEntity
         $this->id = $id;
     }
     
-    public function getUuid(): string
+    public function uuid(): string
     {
         return $this->uuid;
     }
     
-    public function getHandler(): string
+    public function handler(): string
     {
         return $this->handler;
     }
@@ -80,7 +83,12 @@ class CheckInEntity
         return $this->hadSnack;
     }
     
-    public function getCreatedAt(): DateTimeImmutable
+    public function options(): array
+    {
+        return $this->options;
+    }
+    
+    public function createdAt(): DateTimeImmutable
     {
         return $this->createdAt;
     }

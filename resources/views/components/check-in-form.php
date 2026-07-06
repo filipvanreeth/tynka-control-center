@@ -1,5 +1,9 @@
-<div
-    class="bg-white p-4 mb-8 rounded-2xl border-2 border-opal-800">
+<?php
+/** @var $form */
+var_dump($form);
+?>
+
+<div class="bg-white p-4 rounded-2xl border-2 border-opal-800">
     <?php if (!empty($flash)):
         $flashStyle = match ($flash['type']) {
             'error' => 'bg-red-100 text-red-500',
@@ -17,38 +21,49 @@
             <?= htmlspecialchars($flash['message']) ?>
         </div>
     <?php endif; ?>
-    <form
-        action="/checkin" method="POST">
+    <form action="<?= htmlspecialchars($form->action) ?>" method="POST">
         <?php // include __DIR__ . '/../components/handler-avatars.php'; ?>
         <ul class="mb-4 flex flex-col gap-4 text-opal-300">
             <li class="flex flex-col gap-4 border-b border-opal-950 pb-4">
                 <label for="handler" class="text-sm text-opal-300">Tynka was cared by</label>
-                <select name="handler" id="handler" required class="flex-auto rounded-lg border border-opal-800 bg-opal-950/25 p-4 outline-none appearance-none">
+                <select name="handler" id="handler" required
+                    class="flex-auto rounded-lg border border-opal-800 bg-opal-950/25 p-4 outline-none appearance-none">
                     <option value="">I'm ...</option>
-                    <?php foreach ($handlers as $handler): ?>
-                        <option
-                            value="<?= htmlspecialchars($handler['value']) ?>"><?= htmlspecialchars($handler['name']) ?>
+                    <?php foreach ($form->handlers as $handler):
+                        ?>
+                        <option value="<?= htmlspecialchars($handler->slug) ?>">
+                            <?= htmlspecialchars($handler->name) ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
             </li>
             <li class="flex flex-col gap-4 border-b border-opal-950 pb-4">
                 <label for="checkinAt" class="text-sm text-opal-300">At</label>
-                <input type="datetime-local" id="checkInAt" name="checkInAt" required class="flex-auto rounded-lg border border-opal-800 bg-opal-950/25 p-4 outline-none">
+                <?php
+                var_dump($form->data->createdAt);
+                ?>
+                <input type="datetime-local" id="checkInAt" name="checkInAt" required
+                    class="flex-auto rounded-lg border border-opal-800 bg-opal-950/25 p-4 outline-none" value="<?= isset($form->data->createdAt) && !empty($form->data->createdAt)
+                        ? $form->data->createdAt
+                        : null;
+                    ?>">
             </li>
             <li class="flex flex-col gap-4 border-b border-opal-950 pb-4">
                 <label for="options" class="text-sm text-opal-300">During our walk Tynka</label>
                 <?php
-                $walkOptions = array_filter($checkInOptions, function ($checkInOption) {
-                    return in_array($checkInOption['value'], ['peed', 'pooped']);
-                });
+                $walkOptions = array_filter(
+                    $form->options,
+                    function ($checkInOption) {
+                        return $checkInOption->type()->name() === 'walking';
+                    }
+                );
                 ?>
-                <div
-                    class="inline-flex flex-auto gap-x-4">
+                <div class="inline-flex flex-auto gap-x-4">
                     <?php foreach ($walkOptions as $walkOption): ?>
                         <div class="inline-flex gap-2 items-center">
-                            <input type="checkbox" name="<?= htmlspecialchars($walkOption['value']) ?>" value="1" class="accent-opal-300 w-6 h-6">
-                            <p><?= htmlspecialchars($walkOption['label']) ?></p>
+                            <input type="checkbox" name="<?= htmlspecialchars($walkOption->name()) ?>" value="1"
+                                class="accent-opal-300 w-6 h-6" <?= $form->isOptionSelected($walkOption) ? 'checked' : '' ?>>
+                            <p><?= htmlspecialchars($walkOption->label()) ?></p>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -56,33 +71,52 @@
             <li class="flex flex-col gap-4 border-b border-opal-950 pb-4">
                 <label for="options" class="text-sm text-opal-300">I gave Tynka her</label>
                 <?php
-                $careOptions = array_filter($checkInOptions, function ($checkInOption) {
-                    return in_array($checkInOption['value'], ['food', 'snack']);
-                });
+                $careOptions = array_filter(
+                    $form->options,
+                    function ($checkInOption): bool {
+                        return $checkInOption->type()->name() === 'food';
+                    }
+                );
                 ?>
-                <div
-                    class="inline-flex gap-x-4">
+                <div class="inline-flex gap-x-4">
                     <?php foreach ($careOptions as $careOption): ?>
                         <div class="inline-flex gap-2 items-center">
-                            <input type="checkbox" name="<?= htmlspecialchars($careOption['value']) ?>" value="1" class="accent-opal-300 w-6 h-6">
-                            <p><?= htmlspecialchars($careOption['label']) ?></p>
+                            <input type="checkbox" name="<?= htmlspecialchars($careOption->name()) ?>" value="1"
+                                class="accent-opal-300 w-6 h-6" <?= $form->isOptionSelected($careOption) ? 'checked' : '' ?>>
+                            <p><?= htmlspecialchars($careOption->label()) ?></p>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </li>
         </ul>
         <div class="flex flex-row gap-4">
-            <button type="submit" class="shrink bg-opal-800 text-opal-50 font-bold p-4 rounded-lg w-full cursor-pointer">
+            <button type="submit"
+                class="shrink bg-opal-800 text-opal-50 font-bold p-4 rounded-lg w-full cursor-pointer">
                 <div class="inline-flex flex-row items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20.942 13.021a9 9 0 1 0 -9.407 7.967"/><path d="M12 7v5l3 3"/><path d="M15 19l2 2l4 -4"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewbox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="w-5 h-auto">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M20.942 13.021a9 9 0 1 0 -9.407 7.967" />
+                        <path d="M12 7v5l3 3" />
+                        <path d="M15 19l2 2l4 -4" />
+                    </svg>
                     <span class="text-lg">Check In</span>
                 </div>
             </button>
-            <div class="shrink-0 text-center bg-gray-200 flex items-center justify-center rounded-lg px-4 cursor-pointer" role="button" tabindex="0" id="cancel-checkin-btn">
-                <span class="cursor-pointer px-2 py-4 text-gray-400 whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="float-left mr-1 h-5 w-auto align-middle"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M21 12a9 9 0 1 0 -9 9" /><path d="M12 7v5l1 1" /><path d="M16 16h6v6h-6l0 -6" /></svg>Cancel</span>
+            <div class="shrink-0 text-center bg-gray-200 flex items-center justify-center rounded-lg px-4 cursor-pointer"
+                role="button" tabindex="0" id="cancel-checkin-btn">
+                <span class="cursor-pointer px-2 py-4 text-gray-400 whitespace-nowrap"><svg
+                        xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                        class="float-left mr-1 h-5 w-auto align-middle">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M21 12a9 9 0 1 0 -9 9" />
+                        <path d="M12 7v5l1 1" />
+                        <path d="M16 16h6v6h-6l0 -6" />
+                    </svg>Cancel</span>
             </div>
         </div>
 
     </form>
 </div>
-
