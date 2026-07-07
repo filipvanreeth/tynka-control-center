@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace TynkaControlCenter\CheckIn\Application\Query;
 
 use DateTimeImmutable;
-use TynkaControlCenter\CheckIn\Application\Query\AllCheckInsData;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityCategoryRepository;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityId;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityRepository;
@@ -14,47 +13,32 @@ use TynkaControlCenter\Handler\Application\Query\HandlerData;
 use TynkaControlCenter\Handler\Domain\HandlerId;
 use TynkaControlCenter\Handler\Domain\HandlerRepository;
 
-final class GetAllCheckInsHandler
+final class GetCheckInByIdHandler
 {
     public function __construct(
         private readonly CheckInReadModel $readModel,
         private readonly HandlerRepository $handlerRepository,
-        private CheckInActivityRepository $checkInActivityRepository,
-        private CheckInActivityCategoryRepository $checkInActivityCategoryRepository
+        private readonly CheckInActivityRepository $checkInActivityRepository,
+        private readonly CheckInActivityCategoryRepository $checkInActivityCategoryRepository,
     ) {
     }
 
-    public function handle(GetAllCheckInsQuery $query): AllCheckInsData
+    public function handle(GetCheckInByIdQuery $query): ?CheckInData
     {
-        $rows = $this->readModel->all();
+        $row = $this->readModel->byId($query->id);
 
-        if (!$rows) {
-            return new AllCheckInsData(
-                checkIns: [],
-                total: 0,
-            );
+        if ($row === null) {
+            return null;
         }
 
         $locale = new Locale($query->locale);
 
-        $checkIns = array_map(
-            fn($row): CheckInData => new CheckInData(
-                id: $row['id'],
-                handler: $this->resolveHandler($row['handler']),
-                activities: $this->resolveActivities($row, $locale),
-                createdAt: (new DateTimeImmutable($row['created_at']))->format('Y-m-d H:i')
-            ),
-            $rows
+        return new CheckInData(
+            id: $row['uuid'],
+            handler: $this->resolveHandler($row['handler']),
+            activities: $this->resolveActivities($row, $locale),
+            createdAt: (new DateTimeImmutable($row['created_at']))->format('Y-m-d H:i'),
         );
-
-        $total = \count($checkIns);
-
-        $results = new AllCheckInsData(
-            checkIns: $checkIns,
-            total: $total
-        );
-
-        return $results;
     }
 
     private function resolveHandler(string $handlerId): HandlerData
@@ -62,11 +46,7 @@ final class GetAllCheckInsHandler
         $handler = $this->handlerRepository->byId(HandlerId::fromString($handlerId));
 
         if ($handler === null) {
-            return new HandlerData(
-                name: $handlerId,
-                id: $handlerId,
-                avatar: null
-            );
+            return new HandlerData(name: $handlerId, id: $handlerId, avatar: null);
         }
 
         return HandlerData::fromDomain($handler);
@@ -74,7 +54,7 @@ final class GetAllCheckInsHandler
 
     /**
      * @param array<string, mixed> $row
-     * @return CheckInActivityData[]
+     * @return list<CheckInActivityData>
      */
     private function resolveActivities(array $row, Locale $locale): array
     {

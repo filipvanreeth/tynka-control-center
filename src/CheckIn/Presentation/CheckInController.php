@@ -5,14 +5,14 @@ namespace TynkaControlCenter\CheckIn\Presentation;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInOptionsHandler;
-use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInOptionsQuery;
+use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesQuery;
 use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInCommand;
 use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsQuery;
-use TynkaControlCenter\CheckIn\Application\Query\GetCheckInHandler;
-use TynkaControlCenter\CheckIn\Application\Query\GetCheckInQuery;
+use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdQuery;
 use TynkaControlCenter\Config\AppConfig;
 use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
 use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
@@ -26,9 +26,9 @@ class CheckInController
         public readonly Translator $translator,
         public readonly AppConfig $appConfig,
         public readonly TemplateEngine $viewRenderer,
-        public readonly GetCheckInHandler $getCheckInHandler,
+        public readonly GetCheckInByIdHandler $getCheckInHandler,
         public readonly GetAllHandlersHandler $getAllHandlersHandler,
-        public readonly GetAllCheckInOptionsHandler $getAllCheckInOptionsHandler,
+        public readonly GetAllCheckInActivitiesHandler $getAllCheckInActivitiesHandler,
         public readonly GetTopHandlersHandler $getTopHandlersHandler,
         private GetAllCheckInsHandler $getAllCheckInsHandler,
     ) {
@@ -44,10 +44,10 @@ class CheckInController
 
         $redirectUrl = $this->appConfig->appUrl . "/";
 
-        $selectedOptions = [];
-        foreach (["peed", "pooped", "food", "snack"] as $optionSlug) {
-            if (!empty($_POST[$optionSlug])) {
-                $selectedOptions[] = $optionSlug;
+        $selectedActivities = [];
+        foreach (["peed", "pooped", "food", "snack"] as $activitySlug) {
+            if (!empty($_POST[$activitySlug])) {
+                $selectedActivities[] = $activitySlug;
             }
         }
 
@@ -55,7 +55,7 @@ class CheckInController
             $this->recordCheckInHandler->handle(
                 new RecordCheckInCommand(
                     handler: $_POST["handler"],
-                    selectedOptions: $selectedOptions,
+                    selectedActivities: $selectedActivities,
                     createdAt: $createdAt,
                 ),
             );
@@ -85,8 +85,8 @@ class CheckInController
         $checkInForm = new CheckInFormView(
             action: "action",
             handlers: $this->getAllHandlersHandler->handle(),
-            options: $this->getAllCheckInOptionsHandler->handle(
-                new GetAllCheckInOptionsQuery(locale: $locale)
+            activities: $this->getAllCheckInActivitiesHandler->handle(
+                new GetAllCheckInActivitiesQuery(locale: $locale)
             ),
             data: null,
         );
@@ -98,7 +98,7 @@ class CheckInController
         $indexModel = new CheckInIndexView(
             form: $checkInForm,
             checkIns: $allCheckIns->checkIns,
-            checkInOptionStats: [],
+            checkInActivityStats: [],
             topHandlers: $this->getTopHandlersHandler->handle(),
             totalCheckIns: $allCheckIns->total,
             flash: $this->pullFlashFromSession(),
@@ -107,8 +107,8 @@ class CheckInController
         echo $this->viewRenderer->render("check-ins/index", [
             "form" => $indexModel->form,
             "checkIns" => $indexModel->checkIns,
-            "checkInOptions" => $indexModel->form->options,
-            "checkInOptionStats" => $indexModel->checkInOptionStats,
+            "checkInActivities" => $indexModel->form->activities,
+            "checkInActivityStats" => $indexModel->checkInActivityStats,
             "topHandlers" => $indexModel->topHandlers,
             "totalCheckIns" => $indexModel->totalCheckIns,
             "flash" => $indexModel->flash,
@@ -123,13 +123,13 @@ class CheckInController
     public function edit(array $vars): void
     {
         $checkIn = $this->getCheckInHandler->handle(
-            new GetCheckInQuery($vars["id"]),
+            new GetCheckInByIdQuery($vars["id"]),
         );
 
         $formData = new CheckInFormView(
             action: "checkin/{$checkIn->uuid}/edit",
             handlers: $this->getAllHandlersHandler->handle(),
-            options: $this->getAllCheckInOptionsHandler->handle(),
+            activities: $this->getAllCheckInActivitiesHandler->handle(),
             data: $checkIn,
         );
 

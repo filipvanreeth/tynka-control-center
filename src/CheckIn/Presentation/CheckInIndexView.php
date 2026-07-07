@@ -9,7 +9,7 @@ final readonly class CheckInIndexView
     public function __construct(
         public CheckInFormView $form,
         public array $checkIns,
-        public array $checkInOptionStats,
+        public array $checkInActivityStats,
         public array $topHandlers,
         public int $totalCheckIns,
         public ?array $flash,

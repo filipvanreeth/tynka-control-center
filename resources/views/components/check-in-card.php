@@ -27,14 +27,14 @@ if ($createdAtDate->format('Y-m-d') === $today->format('Y-m-d')) {
 $createdAt = htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8');
 $dateColor = htmlspecialchars($dateColor, ENT_QUOTES, 'UTF-8');
 
-$selectedSlugs = array_map(
-    static fn($option) => $option->slug,
-    $checkIn->options
+$selectedActivityIds = array_map(
+    static fn($activity) => $activity->id,
+    $checkIn->activities
 );
-$hasPeed = \in_array('peed', $selectedSlugs, true);
-$hasPooped = \in_array('pooped', $selectedSlugs, true);
-$hadFood = \in_array('food', $selectedSlugs, true);
-$hadSnack = \in_array('snack', $selectedSlugs, true);
+$hasPeed = \in_array('peed', $selectedActivityIds, true);
+$hasPooped = \in_array('pooped', $selectedActivityIds, true);
+$hadFood = \in_array('food', $selectedActivityIds, true);
+$hadSnack = \in_array('snack', $selectedActivityIds, true);
 ?>
 
 <div class="rounded-xl bg-white p-4 first-of-type:border-2 first-of-type:border-opal-800 first-of-type:bg-opal-950/50">

@@ -21,7 +21,7 @@ echo $this->render('header');
         <div
             id="checkin-form-container" class="hidden"><?php echo $this->render('components/check-in-form', [
                 'form' => $form,
-                'checkInOptions' => $checkInOptions,
+                'checkInActivities' => $checkInActivities,
                 'flash' => $flash,
             ]) ?>
         </div>
@@ -56,11 +56,11 @@ echo $this->render('header');
         </div>
         <div
             class="grid grid-cols-3 gap-2"><?php
-            foreach ($checkInOptionStats as $checkInOptionStat) {
-                echo $this->render('components/check-in-option-stat', [
-                    'total' => $checkInOptionStat['total'],
-                    'label' => $checkInOptionStat['label'],
-                    'colors' => $checkInOptionStat['colors']
+            foreach ($checkInActivityStats as $checkInActivityStat) {
+                echo $this->render('components/check-in-activity-stat', [
+                    'total' => $checkInActivityStat['total'],
+                    'label' => $checkInActivityStat['label'],
+                    'colors' => $checkInActivityStat['colors']
                 ]);
             }
             ?>

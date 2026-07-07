@@ -16,7 +16,7 @@ final readonly class PhpTemplateEngine implements TemplateEngine
         AppConfig $appConfig,
     ) {
         $this->globals = [
-            'appUrl'     => $appConfig->appUrl,
+            'appUrl' => $appConfig->appUrl,
             'appVersion' => $appConfig->appVersion,
         ];
     }
@@ -30,6 +30,12 @@ final readonly class PhpTemplateEngine implements TemplateEngine
         extract([...$this->globals, ...$data]);
         include "$this->templatePath/resources/views/{$path}.php";
 
-        return ob_get_clean();
+        $output = ob_get_clean();
+
+        if ($output === false) {
+            throw TemplateRenderingFailed::forPath($path);
+        }
+
+        return $output;
     }
 }

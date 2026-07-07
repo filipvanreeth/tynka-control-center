@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Application\Query;
 
-final readonly class GetAllCheckInOptionsQuery
+final class GetCheckInByIdQuery
 {
     public function __construct(
-        public string $locale,
+        public readonly string $id,
+        public readonly string $locale,
     ) {
     }
 }

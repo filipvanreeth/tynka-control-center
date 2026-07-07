@@ -32,7 +32,7 @@ final class GetTopHandlersHandler
                 return new TopHandlerData(
                     handler: $handler ?? new HandlerData(
                         name: $row['handler'],
-                        slug: $row['handler'],
+                        id: $row['handler'],
                         avatar: null,
                     ),
                     total: (int) $row['total'],

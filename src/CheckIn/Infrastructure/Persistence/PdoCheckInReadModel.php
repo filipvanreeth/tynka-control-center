@@ -9,7 +9,7 @@ use TynkaControlCenter\CheckIn\Application\Query\CheckInReadModel;
 
 final class PdoCheckInReadModel implements CheckInReadModel
 {
-    private const OPTION_COLUMNS = ['peed', 'pooped', 'food', 'snack'];
+    private const ACTIVITY_COLUMNS = ['peed', 'pooped', 'food', 'snack'];
 
     public function __construct(
         private readonly PDO $pdo,
@@ -29,14 +29,57 @@ final class PdoCheckInReadModel implements CheckInReadModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function totalForOption(string $option): int
+    /**
+     * @return array{
+     *     uuid: string,
+     *     handler: string,
+     *     peed: bool,
+     *     pooped: bool,
+     *     food: bool,
+     *     snack: bool,
+     *     created_at: string,
+     * }|null
+     */
+    public function byId(string $id): ?array
     {
-        if (!in_array($option, self::OPTION_COLUMNS, true)) {
-            throw new \InvalidArgumentException('Invalid check-in option: ' . $option);
+        $stmt = $this->pdo->prepare(
+            "SELECT * FROM {$this->tableName} WHERE uuid = :uuid"
+        );
+        $stmt->execute([':uuid' => $id]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!is_array($row)) {
+            return null;
+        }
+
+        $uuid = $row['uuid'] ?? null;
+        $handler = $row['handler'] ?? null;
+        $createdAt = $row['created_at'] ?? null;
+
+        if (!is_string($uuid) || !is_string($handler) || !is_string($createdAt)) {
+            throw new \UnexpectedValueException('Malformed check-in row: missing string fields.');
+        }
+
+        return [
+            'uuid' => $uuid,
+            'handler' => $handler,
+            'peed' => (bool) ($row['peed'] ?? false),
+            'pooped' => (bool) ($row['pooped'] ?? false),
+            'food' => (bool) ($row['food'] ?? false),
+            'snack' => (bool) ($row['snack'] ?? false),
+            'created_at' => $createdAt,
+        ];
+    }
+
+    public function totalForActivity(string $activity): int
+    {
+        if (!in_array($activity, self::ACTIVITY_COLUMNS, true)) {
+            throw new \InvalidArgumentException('Invalid check-in activity: ' . $activity);
         }
 
         $stmt = $this->pdo->prepare(
-            "SELECT COUNT(*) FROM {$this->tableName} WHERE {$option} = 1"
+            "SELECT COUNT(*) FROM {$this->tableName} WHERE {$activity} = 1"
         );
         $stmt->execute();
 

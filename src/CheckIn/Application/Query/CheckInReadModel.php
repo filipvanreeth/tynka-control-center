@@ -14,9 +14,24 @@ interface CheckInReadModel
     public function all(): array;
 
     /**
-     * Number of check-ins for which the given option is set.
+     * Single check-in row by its uuid, or null when it does not exist.
+     *
+     * @return array{
+     *     uuid: string,
+     *     handler: string,
+     *     peed: bool,
+     *     pooped: bool,
+     *     food: bool,
+     *     snack: bool,
+     *     created_at: string,
+     * }|null
      */
-    public function totalForOption(string $option): int;
+    public function byId(string $id): ?array;
+
+    /**
+     * Number of check-ins for which the given activity is set.
+     */
+    public function totalForActivity(string $activity): int;
 
     /**
      * Check-in counts grouped by handler, highest first.

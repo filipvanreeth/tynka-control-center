@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInOptionsHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsHandler;
-use TynkaControlCenter\CheckIn\Application\Query\GetCheckInHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdHandler;
 use TynkaControlCenter\CheckIn\Presentation\CheckInController;
 use TynkaControlCenter\Common\Infrastructure\FileTranslator;
 use TynkaControlCenter\Config\AppConfig;
@@ -68,27 +68,36 @@ $fileTranslator = new FileTranslator(
     "en"
 );
 $recordCheckInHandler = new RecordCheckInHandler($checkInRepository);
-$getCheckInHandler = new GetCheckInHandler($checkInRepository);
 
 $getAllHandlersHandler = new GetAllHandlersHandler($inMemoryHandlerRepository);
 
 $getAllHandlers = $getAllHandlersHandler->handle();
 
-$inMemoryCheckInOptionRepository = new \TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInOptionRepository();
-$inMemoryCheckInOptionCategoryRepository = new \TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInOptionCategoryRepository();
+$inMemoryCheckInActivityRepository = new \TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInActivityRepository();
+$inMemoryCheckInActivityCategoryRepository = new \TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInActivityCategoryRepository();
 
-$getAllCheckInOptionsHandler = new GetAllCheckInOptionsHandler(
-    checkInOptionRepository: $inMemoryCheckInOptionRepository,
-    checkInOptionCategoryRepository: $inMemoryCheckInOptionCategoryRepository,
+$getAllCheckInActivitiesHandler = new GetAllCheckInActivitiesHandler(
+    checkInActivityRepository: $inMemoryCheckInActivityRepository,
+    checkInActivityCategoryRepository: $inMemoryCheckInActivityCategoryRepository,
 );
 
-$checkInReadModel = new PdoCheckInReadModel($pdo, "checkins");
+$checkInReadModel = new PdoCheckInReadModel(
+    $pdo,
+    "checkins"
+);
+
+$getCheckInHandler = new GetCheckInByIdHandler(
+    readModel: $checkInReadModel,
+    handlerRepository: $inMemoryHandlerRepository,
+    checkInActivityRepository: $inMemoryCheckInActivityRepository,
+    checkInActivityCategoryRepository: $inMemoryCheckInActivityCategoryRepository,
+);
 
 $getAllCheckInsHandler = new GetAllCheckInsHandler(
     readModel: $checkInReadModel,
     handlerRepository: $inMemoryHandlerRepository,
-    checkInOptionRepository: $inMemoryCheckInOptionRepository,
-    checkInOptionCategoryRepository: $inMemoryCheckInOptionCategoryRepository,
+    checkInActivityRepository: $inMemoryCheckInActivityRepository,
+    checkInActivityCategoryRepository: $inMemoryCheckInActivityCategoryRepository,
 );
 
 $getTopHandlersHandler = new GetTopHandlersHandler(
@@ -106,7 +115,7 @@ $checkInController = new CheckInController(
     ),
     getCheckInHandler: $getCheckInHandler,
     getAllHandlersHandler: $getAllHandlersHandler,
-    getAllCheckInOptionsHandler: $getAllCheckInOptionsHandler,
+    getAllCheckInActivitiesHandler: $getAllCheckInActivitiesHandler,
     getTopHandlersHandler: $getTopHandlersHandler,
     getAllCheckInsHandler: $getAllCheckInsHandler,
 );

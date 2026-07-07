@@ -10,7 +10,7 @@ final readonly class HandlerData
 {
     public function __construct(
         public string $name,
-        public string $slug,
+        public string $id,
         public ?string $avatar,
     ) {
     }
@@ -19,7 +19,7 @@ final readonly class HandlerData
     {
         return new self(
             name: $domain->name(),
-            slug: $domain->id()->toString(),
+            id: $domain->id()->toString(),
             avatar: $domain->avatar()?->path()
         );
     }

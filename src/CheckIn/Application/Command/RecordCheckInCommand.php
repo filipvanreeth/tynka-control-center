@@ -9,11 +9,11 @@ use DateTimeImmutable;
 final readonly class RecordCheckInCommand
 {
     /**
-     * @param list<string> $selectedOptions option slugs, e.g. ['peed', 'food']
+     * @param list<string> $selectedActivities activity slugs, e.g. ['peed', 'food']
      */
     public function __construct(
         public string $handler,
-        public array $selectedOptions,
+        public array $selectedActivities,
         public DateTimeImmutable $createdAt,
     ) {
     }

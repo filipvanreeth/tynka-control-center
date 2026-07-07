@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Application\Query;
 
-final class GetCheckInQuery
+final readonly class StatisticsCheckInActivityData
 {
     public function __construct(
-        public readonly string $id,
+        public string $id,
+        public string $title,
+        public int $total,
     ) {
     }
 }

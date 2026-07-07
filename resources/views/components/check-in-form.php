@@ -30,7 +30,7 @@
                     <option value="">I'm ...</option>
                     <?php foreach ($form->handlers as $handler):
                         ?>
-                        <option value="<?= htmlspecialchars($handler->slug) ?>">
+                        <option value="<?= htmlspecialchars($handler->id) ?>">
                             <?= htmlspecialchars($handler->name) ?>
                         </option>
                     <?php endforeach; ?>
@@ -45,41 +45,41 @@
                     ?>">
             </li>
             <li class="flex flex-col gap-4 border-b border-opal-950 pb-4">
-                <label for="options" class="text-sm text-opal-300">During our walk Tynka</label>
+                <label for="activities" class="text-sm text-opal-300">During our walk Tynka</label>
                 <?php
-                $walkOptions = array_filter(
-                    $form->options,
-                    function ($checkInOption) {
-                        return $checkInOption->category->slug === 'walking';
+                $walkActivities = array_filter(
+                    $form->activities,
+                    function ($checkInActivity) {
+                        return $checkInActivity->category->id === 'walking';
                     }
                 );
                 ?>
                 <div class="inline-flex flex-auto gap-x-4">
-                    <?php foreach ($walkOptions as $walkOption): ?>
+                    <?php foreach ($walkActivities as $walkActivity): ?>
                         <div class="inline-flex gap-2 items-center">
-                            <input type="checkbox" name="<?= htmlspecialchars($walkOption->slug) ?>" value="1"
-                                class="accent-opal-300 w-6 h-6" <?= $form->isOptionSelected($walkOption) ? 'checked' : '' ?>>
-                            <p><?= htmlspecialchars($walkOption->title) ?></p>
+                            <input type="checkbox" name="<?= htmlspecialchars($walkActivity->id) ?>" value="1"
+                                class="accent-opal-300 w-6 h-6" <?= $form->isActivitySelected($walkActivity) ? 'checked' : '' ?>>
+                            <p><?= htmlspecialchars($walkActivity->title) ?></p>
                         </div>
                     <?php endforeach; ?>
                 </div>
             </li>
             <li class="flex flex-col gap-4 border-b border-opal-950 pb-4">
-                <label for="options" class="text-sm text-opal-300">I gave Tynka her</label>
+                <label for="activities" class="text-sm text-opal-300">I gave Tynka her</label>
                 <?php
-                $careOptions = array_filter(
-                    $form->options,
-                    function ($checkInOption): bool {
-                        return $checkInOption->category->slug === 'food';
+                $careActivities = array_filter(
+                    $form->activities,
+                    function ($checkInActivity): bool {
+                        return $checkInActivity->category->id === 'food';
                     }
                 );
                 ?>
                 <div class="inline-flex gap-x-4">
-                    <?php foreach ($careOptions as $careOption): ?>
+                    <?php foreach ($careActivities as $careActivity): ?>
                         <div class="inline-flex gap-2 items-center">
-                            <input type="checkbox" name="<?= htmlspecialchars($careOption->slug) ?>" value="1"
-                                class="accent-opal-300 w-6 h-6" <?= $form->isOptionSelected($careOption) ? 'checked' : '' ?>>
-                            <p><?= htmlspecialchars($careOption->title) ?></p>
+                            <input type="checkbox" name="<?= htmlspecialchars($careActivity->id) ?>" value="1"
+                                class="accent-opal-300 w-6 h-6" <?= $form->isActivitySelected($careActivity) ? 'checked' : '' ?>>
+                            <p><?= htmlspecialchars($careActivity->title) ?></p>
                         </div>
                     <?php endforeach; ?>
                 </div>

@@ -8,13 +8,13 @@ use DateTimeImmutable;
 use PDO;
 use TynkaControlCenter\CheckIn\Domain\CheckIn;
 use TynkaControlCenter\CheckIn\Domain\CheckInId;
-use TynkaControlCenter\CheckIn\Domain\CheckInOptionId;
+use TynkaControlCenter\CheckIn\Domain\CheckInActivityId;
 use TynkaControlCenter\CheckIn\Domain\CheckInRepository;
 use TynkaControlCenter\Handler\Domain\HandlerId;
 
 final class PdoCheckInRepository implements CheckInRepository
 {
-    private const OPTION_COLUMNS = ['peed', 'pooped', 'food', 'snack'];
+    private const ACTIVITY_COLUMNS = ['peed', 'pooped', 'food', 'snack'];
 
     public function __construct(
         private readonly PDO $pdo,
@@ -30,8 +30,8 @@ final class PdoCheckInRepository implements CheckInRepository
         );
 
         $selectedSlugs = array_map(
-            static fn(CheckInOptionId $option): string => $option->toString(),
-            $checkIn->selectedOptions()
+            static fn(CheckInActivityId $activity): string => $activity->toString(),
+            $checkIn->selectedActivities()
         );
 
         $executed = $stmt->execute([
@@ -64,17 +64,17 @@ final class PdoCheckInRepository implements CheckInRepository
             return null;
         }
 
-        $selectedOptions = [];
-        foreach (self::OPTION_COLUMNS as $optionSlug) {
-            if ((bool) $row[$optionSlug]) {
-                $selectedOptions[] = CheckInOptionId::fromString($optionSlug);
+        $selectedActivities = [];
+        foreach (self::ACTIVITY_COLUMNS as $activitySlug) {
+            if ((bool) $row[$activitySlug]) {
+                $selectedActivities[] = CheckInActivityId::fromString($activitySlug);
             }
         }
 
         return CheckIn::reconstitute(
-            id: CheckInId::fromString($row['uuid']),
+            id: CheckInId::fromString((string) $row['uuid']),
             handlerId: HandlerId::fromString($row['handler']),
-            selectedOptions: $selectedOptions,
+            selectedActivities: $selectedActivities,
             createdAt: new DateTimeImmutable($row['created_at']),
         );
     }

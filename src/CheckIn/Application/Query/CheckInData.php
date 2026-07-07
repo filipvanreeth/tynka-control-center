@@ -10,10 +10,9 @@ use TynkaControlCenter\Handler\Application\Query\HandlerData;
 final readonly class CheckInData
 {
     public function __construct(
-        public ?int $id,
-        public string $uuid,
+        public string $id,
         public HandlerData $handler,
-        public array $options,
+        public array $activities,
         public string $createdAt,
     ) {
     }

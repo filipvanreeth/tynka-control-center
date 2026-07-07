@@ -11,45 +11,45 @@ use TynkaControlCenter\Handler\Domain\HandlerId;
 final class CheckIn extends AggregateRoot
 {
     /**
-     * @param list<CheckInOptionId> $selectedOptions
+     * @param list<CheckInActivityId> $selectedActivities
      */
     private function __construct(
         private readonly CheckInId $id,
         private readonly HandlerId $handlerId,
-        private readonly array $selectedOptions,
+        private readonly array $selectedActivities,
         private readonly DateTimeImmutable $createdAt,
     ) {
     }
 
     /**
-     * @param list<CheckInOptionId> $selectedOptions
+     * @param list<CheckInActivityId> $selectedActivities
      */
     public static function create(
         HandlerId $handlerId,
-        array $selectedOptions,
+        array $selectedActivities,
         DateTimeImmutable $createdAt,
     ): self {
         return new self(
             id: CheckInId::generate(),
             handlerId: $handlerId,
-            selectedOptions: $selectedOptions,
+            selectedActivities: $selectedActivities,
             createdAt: $createdAt,
         );
     }
 
     /**
-     * @param list<CheckInOptionId> $selectedOptions
+     * @param list<CheckInActivityId> $selectedActivities
      */
     public static function reconstitute(
         CheckInId $id,
         HandlerId $handlerId,
-        array $selectedOptions,
+        array $selectedActivities,
         DateTimeImmutable $createdAt,
     ): self {
         return new self(
             id: $id,
             handlerId: $handlerId,
-            selectedOptions: $selectedOptions,
+            selectedActivities: $selectedActivities,
             createdAt: $createdAt,
         );
     }
@@ -65,17 +65,17 @@ final class CheckIn extends AggregateRoot
     }
 
     /**
-     * @return list<CheckInOptionId>
+     * @return list<CheckInActivityId>
      */
-    public function selectedOptions(): array
+    public function selectedActivities(): array
     {
-        return $this->selectedOptions;
+        return $this->selectedActivities;
     }
 
-    public function hasOption(CheckInOptionId $optionId): bool
+    public function hasActivity(CheckInActivityId $activityId): bool
     {
-        foreach ($this->selectedOptions as $selected) {
-            if ($selected->equals($optionId)) {
+        foreach ($this->selectedActivities as $selected) {
+            if ($selected->equals($activityId)) {
                 return true;
             }
         }
