@@ -39,7 +39,7 @@ final class GetAllCheckInsHandler
 
         $checkIns = array_map(
             fn($row): CheckInData => new CheckInData(
-                id: $row['id'],
+                id: $row['uuid'],
                 handler: $this->resolveHandler($row['handler']),
                 activities: $this->resolveActivities($row, $locale),
                 createdAt: (new DateTimeImmutable($row['created_at']))->format('Y-m-d H:i')
