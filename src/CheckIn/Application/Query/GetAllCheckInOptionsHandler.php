@@ -8,8 +8,6 @@ use TynkaControlCenter\CheckIn\Domain\CheckInOption;
 use TynkaControlCenter\CheckIn\Domain\CheckInOptionCategoryRepository;
 use TynkaControlCenter\CheckIn\Domain\CheckInOptionRepository;
 use TynkaControlCenter\Common\Domain\Locale;
-use TynkaControlCenter\Common\Domain\Slug;
-use TynkaControlCenter\Common\Domain\Translator;
 
 final class GetAllCheckInOptionsHandler
 {
@@ -29,8 +27,8 @@ final class GetAllCheckInOptionsHandler
 
         return array_map(
             function (CheckInOption $option) use ($locale): CheckInOptionData {
-                $category = $this->checkInOptionCategoryRepository->findBySlug(
-                    slug: $option->categoryId()
+                $category = $this->checkInOptionCategoryRepository->byId(
+                    $option->categoryId()
                 );
 
                 if ($category === null) {

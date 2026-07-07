@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace TynkaControlCenter\CheckIn\Infrastructure;
 
 use TynkaControlCenter\CheckIn\Domain\CheckInOptionCategory;
+use TynkaControlCenter\CheckIn\Domain\CheckInOptionCategoryId;
 use TynkaControlCenter\CheckIn\Domain\CheckInOptionCategoryRepository;
-use TynkaControlCenter\Common\Domain\Slug;
 use TynkaControlCenter\Common\Domain\TranslatedText;
 
 final class InMemoryCheckInOptionCategoryRepository implements CheckInOptionCategoryRepository
@@ -17,31 +17,21 @@ final class InMemoryCheckInOptionCategoryRepository implements CheckInOptionCate
     public function findAll(): array
     {
         return [
-            new CheckInOptionCategory(
-                title: new TranslatedText(
-                    translations: [
-                        'en' => 'Walking',
-                        'nl' => 'Wandelen',
-                    ]
-                ),
-                slug: new Slug('walking')
+            CheckInOptionCategory::reconstitute(
+                id: CheckInOptionCategoryId::fromString('walking'),
+                title: new TranslatedText(['en' => 'Walking', 'nl' => 'Wandelen']),
             ),
-            new CheckInOptionCategory(
-                title: new TranslatedText(
-                    translations: [
-                        'en' => 'Food',
-                        'nl' => 'Voeding',
-                    ]
-                ),
-                slug: new Slug('food')
+            CheckInOptionCategory::reconstitute(
+                id: CheckInOptionCategoryId::fromString('food'),
+                title: new TranslatedText(['en' => 'Food', 'nl' => 'Voeding']),
             ),
         ];
     }
 
-    public function findBySlug(Slug $slug): ?CheckInOptionCategory
+    public function byId(CheckInOptionCategoryId $id): ?CheckInOptionCategory
     {
         foreach ($this->findAll() as $category) {
-            if ($category->slug()->value() === $slug->value()) {
+            if ($category->id()->equals($id)) {
                 return $category;
             }
         }

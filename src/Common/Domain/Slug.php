@@ -10,7 +10,7 @@ final class Slug
         private string $value,
     ) {
         if (trim($value) === '') {
-            throw new \InvalidArgumentException('Value cannot be empty');
+            throw InvalidSlug::emptyValue();
         }
 
         if (
@@ -19,9 +19,7 @@ final class Slug
                 $value
             )
         ) {
-            throw new \InvalidArgumentException(
-                "{$value} may only contain letters, numbers, underscores and dashes."
-            );
+            throw InvalidSlug::invalidCharacters($value);
         }
     }
 

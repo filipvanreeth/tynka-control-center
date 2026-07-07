@@ -1,36 +1,35 @@
 <?php
 
-declare(strict_types= 1);
+declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Application\Query;
 
-use TynkaControlCenter\Repositories\CheckInRepository;
+use TynkaControlCenter\CheckIn\Domain\CheckInId;
+use TynkaControlCenter\CheckIn\Domain\CheckInRepository;
 
 final class GetCheckInHandler
 {
     public function __construct(
-        private CheckInRepository $checkInRepository,
+        private readonly CheckInRepository $checkInRepository,
     ) {
-    
     }
-    
+
     public function handle(GetCheckInQuery $query): ?CheckInData
-    {   
-        $checkIn = $this->checkInRepository->findByUuid($query->id);
-        
-        if($checkIn === null) {
+    {
+        $checkIn = $this->checkInRepository->byId(
+            CheckInId::fromString($query->id)
+        );
+
+        if ($checkIn === null) {
             return null;
         }
-        
-        return new CheckInData(
-            id: $checkIn->id(),
-            uuid: $checkIn->uuid(),
-            handler: $checkIn->handler(),
-            hasPeed: $checkIn->hasPeed(),
-            hasPooped: $checkIn->hasPooped(),
-            hadFood: $checkIn->hadFood(),
-            hadSnack: $checkIn->hadSnack(),
-            createdAt: $checkIn->createdAt()->format('Y-m-d H:i:s'),
+
+        // PARKED (edit-fix): CheckInData opbouwen via een gecentraliseerde
+        // CheckInData::fromDomain(...) — handler (HandlerData) en selectedOptions
+        // moeten nog geresolved worden tegen hun repositories. Zie migratiestatus
+        // in CLAUDE.md. De edit-route is bewust nog niet functioneel.
+        throw new \RuntimeException(
+            'GetCheckInHandler: DTO-mapping (CheckInData::fromDomain) nog te implementeren.'
         );
     }
 }

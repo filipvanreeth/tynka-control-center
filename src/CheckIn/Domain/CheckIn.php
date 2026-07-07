@@ -1,93 +1,88 @@
 <?php
+
 declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Domain;
 
 use DateTimeImmutable;
-use Ramsey\Uuid\Uuid;
+use TynkaControlCenter\Common\Domain\AggregateRoot;
+use TynkaControlCenter\Handler\Domain\HandlerId;
 
-class CheckIn
+final class CheckIn extends AggregateRoot
 {
-    public function __construct(
-        public ?int $id,
-        public readonly string $uuid,
-        public readonly string $handler,
-        public readonly bool $hasPeed,
-        public readonly bool $hasPooped,
-        public readonly bool $hadFood,
-        public readonly bool $hadSnack,
-        private array $options,
-        public readonly DateTimeImmutable $createdAt
+    /**
+     * @param list<CheckInOptionId> $selectedOptions
+     */
+    private function __construct(
+        private readonly CheckInId $id,
+        private readonly HandlerId $handlerId,
+        private readonly array $selectedOptions,
+        private readonly DateTimeImmutable $createdAt,
     ) {
     }
-    
+
+    /**
+     * @param list<CheckInOptionId> $selectedOptions
+     */
     public static function create(
-        string $handler,
-        bool $hasPeed,
-        bool $hasPooped,
-        bool $hadFood,
-        bool $hadSnack,
-        array $options,
-        DateTimeImmutable $createdAt
+        HandlerId $handlerId,
+        array $selectedOptions,
+        DateTimeImmutable $createdAt,
     ): self {
         return new self(
-            id: null,
-            uuid: Uuid::uuid7()->toString(),
-            handler: $handler,
-            hasPeed: $hasPeed,
-            hasPooped: $hasPooped,
-            hadFood: $hadFood,
-            hadSnack: $hadSnack,
-            options: $options,
-            createdAt: $createdAt
+            id: CheckInId::generate(),
+            handlerId: $handlerId,
+            selectedOptions: $selectedOptions,
+            createdAt: $createdAt,
         );
     }
-    
-    public function id(): ?int
+
+    /**
+     * @param list<CheckInOptionId> $selectedOptions
+     */
+    public static function reconstitute(
+        CheckInId $id,
+        HandlerId $handlerId,
+        array $selectedOptions,
+        DateTimeImmutable $createdAt,
+    ): self {
+        return new self(
+            id: $id,
+            handlerId: $handlerId,
+            selectedOptions: $selectedOptions,
+            createdAt: $createdAt,
+        );
+    }
+
+    public function id(): CheckInId
     {
         return $this->id;
     }
-    
-    public function setId(int $id): void
+
+    public function handlerId(): HandlerId
     {
-        $this->id = $id;
+        return $this->handlerId;
     }
-    
-    public function uuid(): string
+
+    /**
+     * @return list<CheckInOptionId>
+     */
+    public function selectedOptions(): array
     {
-        return $this->uuid;
+        return $this->selectedOptions;
     }
-    
-    public function handler(): string
+
+    public function hasOption(CheckInOptionId $optionId): bool
     {
-        return $this->handler;
+        foreach ($this->selectedOptions as $selected) {
+            if ($selected->equals($optionId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
-    
-    public function hasPeed(): bool
-    {
-        return $this->hasPeed;
-    }
-    
-    public function hasPooped(): bool
-    {
-        return $this->hasPooped;
-    }
-    
-    public function hadFood(): bool
-    {
-        return $this->hadFood;
-    }
-    
-    public function hadSnack(): bool
-    {
-        return $this->hadSnack;
-    }
-    
-    public function options(): array
-    {
-        return $this->options;
-    }
-    
+
     public function createdAt(): DateTimeImmutable
     {
         return $this->createdAt;

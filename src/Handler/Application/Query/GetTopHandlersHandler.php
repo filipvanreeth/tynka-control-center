@@ -4,48 +4,41 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\Handler\Application\Query;
 
-use TynkaControlCenter\Common\Domain\Slug;
-use TynkaControlCenter\Handler\Application\Query\HandlerData;
+use TynkaControlCenter\CheckIn\Application\Query\CheckInReadModel;
 use TynkaControlCenter\Handler\Domain\HandlerRepository;
 
 final class GetTopHandlersHandler
 {
     public function __construct(
-        public readonly \PDO $pdo,
-        public readonly HandlerRepository $handlerRepository
+        private readonly CheckInReadModel $readModel,
+        private readonly HandlerRepository $handlerRepository
     ) {
     }
 
+    /**
+     * @return list<TopHandlerData>
+     */
     public function handle(): array
     {
-        $limit = 5;
+        $handlers = $this->readModel->handlerCounts(5);
+        $getHandlerById = new GetHandlerByIdHandler($this->handlerRepository);
 
-        $stmt = $this->pdo->prepare(
-            "SELECT handler, COUNT(*) as total
-         FROM checkins
-         GROUP BY handler
-         ORDER BY total DESC
-         LIMIT :limit"
-        );
-        $stmt->bindValue(
-            ':limit',
-            $limit,
-            \PDO::PARAM_INT
-        );
-        $stmt->execute();
+        return array_map(
+            function (array $row) use ($getHandlerById): TopHandlerData {
+                $handler = $getHandlerById->handle(
+                    new GetHandlerByIdQuery($row['handler'])
+                );
 
-        $handlers = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        $rows = array_map(
-            function (array $row) {
-                $handler = (new GetHandlerBySlugHandler(
-                    $this->handlerRepository
-                ))->handle(new Slug($row['handler']));
-                return $handler;
+                return new TopHandlerData(
+                    handler: $handler ?? new HandlerData(
+                        name: $row['handler'],
+                        slug: $row['handler'],
+                        avatar: null,
+                    ),
+                    total: (int) $row['total'],
+                );
             },
             $handlers
         );
-
-        return $rows;
     }
 }

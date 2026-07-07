@@ -7,35 +7,29 @@ use DateTimeImmutable;
 use DateTimeZone;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInOptionsHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInOptionsQuery;
+use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInCommand;
+use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsQuery;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInQuery;
-use TynkaControlCenter\CheckIn\Application\Query\GetStatisticsForCheckInOption;
-use TynkaControlCenter\CheckIn\Domain\CheckInOptionRepository;
-use TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInOptionRepository;
 use TynkaControlCenter\Config\AppConfig;
 use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
 use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
-use TynkaControlCenter\Handler\Infrastructure\InMemoryHandlerRepository;
-use TynkaControlCenter\Infrastructure\PhpTemplateEngine;
-use TynkaControlCenter\Services\CheckInService;
-use TynkaControlCenter\Services\HandlerService;
+use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
 use TynkaControlCenter\Common\Domain\Translator;
 
 class CheckInController
 {
     public function __construct(
-        public readonly CheckInService $checkInService,
-        public readonly HandlerService $handlerService,
+        private readonly RecordCheckInHandler $recordCheckInHandler,
         public readonly Translator $translator,
         public readonly AppConfig $appConfig,
-        public readonly PhpTemplateEngine $viewRenderer,
+        public readonly TemplateEngine $viewRenderer,
         public readonly GetCheckInHandler $getCheckInHandler,
         public readonly GetAllHandlersHandler $getAllHandlersHandler,
         public readonly GetAllCheckInOptionsHandler $getAllCheckInOptionsHandler,
-        public readonly \PDO $pdo,
-        public readonly CheckInOptionRepository $checkInOptionRepository,
+        public readonly GetTopHandlersHandler $getTopHandlersHandler,
         private GetAllCheckInsHandler $getAllCheckInsHandler,
     ) {
     }
@@ -50,14 +44,20 @@ class CheckInController
 
         $redirectUrl = $this->appConfig->appUrl . "/";
 
+        $selectedOptions = [];
+        foreach (["peed", "pooped", "food", "snack"] as $optionSlug) {
+            if (!empty($_POST[$optionSlug])) {
+                $selectedOptions[] = $optionSlug;
+            }
+        }
+
         try {
-            $this->checkInService->recordCheckIn(
-                handler: $_POST["handler"],
-                hasPeed: !empty($_POST["peed"]),
-                hasPooped: !empty($_POST["pooped"]),
-                hadFood: !empty($_POST["food"]),
-                hadSnack: !empty($_POST["snack"]),
-                createdAt: $createdAt,
+            $this->recordCheckInHandler->handle(
+                new RecordCheckInCommand(
+                    handler: $_POST["handler"],
+                    selectedOptions: $selectedOptions,
+                    createdAt: $createdAt,
+                ),
             );
         } catch (\Exception $e) {
             $_SESSION["flash"] = [
@@ -79,7 +79,7 @@ class CheckInController
     public function index(): void
     {
         $locale = \is_string($_SESSION['locale'] ?? null)
-            ? $_SESSION['locale'] 
+            ? $_SESSION['locale']
             : 'en';
 
         $checkInForm = new CheckInFormView(
@@ -99,78 +99,19 @@ class CheckInController
             form: $checkInForm,
             checkIns: $allCheckIns->checkIns,
             checkInOptionStats: [],
-            topHandlers: (new GetTopHandlersHandler(
-                pdo: $this->pdo,
-                handlerRepository: new InMemoryHandlerRepository(),
-            ))->handle(),
+            topHandlers: $this->getTopHandlersHandler->handle(),
             totalCheckIns: $allCheckIns->total,
             flash: $this->pullFlashFromSession(),
         );
 
-        $statistics = (new GetStatisticsForCheckInOption(
-            $this->checkInOptionRepository,
-            $this->pdo,
-        ))->handle('peed');
-
-        // Old code.
-
-        $handlers = $this->getAllHandlersHandler->handle();
-        $checkIns = $this->getAllCheckInsHandler->handle(
-            new GetAllCheckInsQuery(locale: $locale)
-        );
-        die();
-        // $checkIns = $this->checkInService->getAllCheckIns(
-        //     order: "DESC",
-        //     limit: 10,
-        // );
-        // $checkInOptions = CheckInOptions::forForm($this->translationService);
-        // $htmlLang = $this->translationService->getHtmlLang();
-        // $flash = $this->pullFlashFromSession();
-
-        // header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-        // header("Pragma: no-cache");
-
-
-
-        // $checkInOptionStats = [];
-        // $checkInOptionStats[] = [
-        //     "label" => $this->translationService->translate("Peed"),
-        //     "total" => $this->checkInService->checkinRepository->findTotalsByCheckInOption(
-        //         "peed",
-        //     )[0]["total"],
-        //     "colors" => "bg-dairy-cream-200 border-dairy-cream-200/50",
-        // ];
-        // $checkInOptionStats[] = [
-        //     "label" => $this->translationService->translate("Pooped"),
-        //     "total" => $this->checkInService->checkinRepository->findTotalsByCheckInOption(
-        //         "pooped",
-        //     )[0]["total"],
-        //     "colors" => "bg-opal-800 border-opal-800/50",
-        // ];
-        // $checkInOptionStats[] = [
-        //     "label" => $this->translationService->translate("Snacks"),
-        //     "total" => $this->checkInService->checkinRepository->findTotalsByCheckInOption(
-        //         "snack",
-        //     )[0]["total"],
-        //     "colors" => "bg-periwinkle-800 border-periwinkle-800/50",
-        // ];
-
         echo $this->viewRenderer->render("check-ins/index", [
-            "handlers" => $handlers,
-            "checkIns" => $checkIns,
-            "checkInOptions" => $checkInOptions,
-            "htmlLang" => $htmlLang,
-            "form" => [
-                "action" => "checkin",
-            ],
-            "viewRenderer" => $this->viewRenderer,
-            "handlerService" => $this->handlerService,
-            "topHandlers" => $this->checkInService->getTopHandlers(limit: 5),
-            "flash" => $flash,
-            "checkInOptionStats" => $checkInOptionStats,
-            "totalCheckIns" => count(
-                $this->checkInService->getAllCheckIns(order: "DESC"),
-            ),
+            "form" => $indexModel->form,
+            "checkIns" => $indexModel->checkIns,
+            "checkInOptions" => $indexModel->form->options,
+            "checkInOptionStats" => $indexModel->checkInOptionStats,
+            "topHandlers" => $indexModel->topHandlers,
+            "totalCheckIns" => $indexModel->totalCheckIns,
+            "flash" => $indexModel->flash,
         ]);
     }
 

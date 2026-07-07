@@ -10,7 +10,7 @@ final class Avatar
         private string $path,
     ) {
         if (trim($path) === '') {
-            throw new \InvalidArgumentException('Avatar path cannot be empty');
+            throw InvalidAvatar::emptyPath();
         }
     }
 

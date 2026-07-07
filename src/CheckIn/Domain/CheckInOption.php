@@ -4,36 +4,42 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Domain;
 
-use TynkaControlCenter\Common\Domain\Slug;
 use TynkaControlCenter\Common\Domain\TranslatedText;
 
 final class CheckInOption
 {
-    /**
-     * Summary of __construct
-     * @param TranslatedText $title
-     * @param Slug $slug
-     * @param Slug $categoryId
-     */
-    public function __construct(
-        private TranslatedText $title,
-        private Slug $slug,
-        private Slug $categoryId,
+    private function __construct(
+        private readonly CheckInOptionId $id,
+        private readonly TranslatedText $title,
+        private readonly CheckInOptionCategoryId $categoryId,
     ) {
     }
-    
+
+    public static function reconstitute(
+        CheckInOptionId $id,
+        TranslatedText $title,
+        CheckInOptionCategoryId $categoryId,
+    ): self {
+        return new self($id, $title, $categoryId);
+    }
+
+    public function id(): CheckInOptionId
+    {
+        return $this->id;
+    }
+
     public function title(): TranslatedText
     {
         return $this->title;
     }
-    
-    public function slug(): Slug
-    {
-        return $this->slug;
-    }
-    
-    public function categoryId(): Slug
+
+    public function categoryId(): CheckInOptionCategoryId
     {
         return $this->categoryId;
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->id->equals($other->id);
     }
 }

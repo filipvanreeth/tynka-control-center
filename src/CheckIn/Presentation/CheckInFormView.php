@@ -30,10 +30,12 @@ final readonly class CheckInFormView
             return false;
         }
 
-        return \in_array(
-            $option->slug,
-            $this->data->selectedOptions,
-            true
-        );
+        foreach ($this->data->options as $selected) {
+            if ($selected->slug === $option->slug) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -24,7 +24,7 @@ final readonly class CheckInOptionData
     ): self {
         return new self(
             title: $option->title()->forLocale($locale),
-            slug: $option->slug()->value(),
+            slug: $option->id()->toString(),
             category: CheckInOptionCategoryData::fromDomain(
                 domain: $category,
                 locale: $locale,

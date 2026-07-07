@@ -1,15 +1,13 @@
 <?php
-/** @var \TynkaControlCenter\CheckIn\Domain\CheckIn $checkIn */
+/** @var \TynkaControlCenter\CheckIn\Application\Query\CheckInData $checkIn */
 
-$handler = $handlerService->getHandler($checkIn->handler());
-
-$handlerAvatar = !empty($handler['avatar'])
-    ? $this->appConfig->appUrl . '/assets/images/' . $handler['avatar']
+$handlerAvatar = !empty($checkIn->handler->avatar)
+    ? $appUrl . '/assets/images/' . $checkIn->handler->avatar
     : null;
 
-$handlerName = htmlspecialchars($handlerService->getHandlerName($checkIn->handler()), ENT_QUOTES, 'UTF-8');
+$handlerName = htmlspecialchars($checkIn->handler->name, ENT_QUOTES, 'UTF-8');
 
-$createdAtDate = $checkIn->createdAt()
+$createdAtDate = (new \DateTimeImmutable($checkIn->createdAt, new \DateTimeZone('UTC')))
     ->setTimezone(new \DateTimeZone('Europe/Brussels'));
 
 $today = new \DateTime('now', new \DateTimeZone('Europe/Brussels'));
@@ -29,10 +27,14 @@ if ($createdAtDate->format('Y-m-d') === $today->format('Y-m-d')) {
 $createdAt = htmlspecialchars($createdAt, ENT_QUOTES, 'UTF-8');
 $dateColor = htmlspecialchars($dateColor, ENT_QUOTES, 'UTF-8');
 
-$hasPeed = $checkIn->hasPeed();
-$hasPooped = $checkIn->hasPooped();
-$hadFood = $checkIn->hadFood();
-$hadSnack = $checkIn->hadSnack();
+$selectedSlugs = array_map(
+    static fn($option) => $option->slug,
+    $checkIn->options
+);
+$hasPeed = \in_array('peed', $selectedSlugs, true);
+$hasPooped = \in_array('pooped', $selectedSlugs, true);
+$hadFood = \in_array('food', $selectedSlugs, true);
+$hadSnack = \in_array('snack', $selectedSlugs, true);
 ?>
 
 <div class="rounded-xl bg-white p-4 first-of-type:border-2 first-of-type:border-opal-800 first-of-type:bg-opal-950/50">

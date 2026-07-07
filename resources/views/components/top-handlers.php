@@ -13,11 +13,10 @@
         <?php else: ?>
             <ol
                 class="flex flex-col gap-2">
-                <?php foreach ($topHandlers as $index => $topHandler):
-                    $handler = $handlerService->getHandler($topHandler['handler']);
-                    $name = htmlspecialchars($handler['name'] ?? $topHandler['handler'], ENT_QUOTES, 'UTF-8');
-                    $avatar = !empty($handler['avatar'])
-                        ? $this->appConfig->appUrl . '/assets/images/' . $handler['avatar']
+                <?php foreach ($topHandlers as $topHandler):
+                    $name = htmlspecialchars($topHandler->handler->name, ENT_QUOTES, 'UTF-8');
+                    $avatar = !empty($topHandler->handler->avatar)
+                        ? $appUrl . '/assets/images/' . $topHandler->handler->avatar
                         : null;
                     ?>
                     <li
@@ -30,7 +29,7 @@
                         <?php endif; ?>
                         <span class="grow font-bold"><?= $name ?></span>
                         <span
-                            class="text-periwinkle-100"><?= (int) $topHandler['total'] ?>
+                            class="text-periwinkle-100"><?= $topHandler->total ?>
                         </span>
                     </li>
                 <?php endforeach; ?>

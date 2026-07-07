@@ -19,7 +19,7 @@ final readonly class HandlerData
     {
         return new self(
             name: $domain->name(),
-            slug: $domain->slug()->value(),
+            slug: $domain->id()->toString(),
             avatar: $domain->avatar()?->path()
         );
     }

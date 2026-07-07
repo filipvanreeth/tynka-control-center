@@ -8,7 +8,7 @@ echo $this->render('header');
             <h1 class="text-periwinkle-100 uppercase">
                 <span class="font-bold">Tynka's</span>
                 Care Center
-                <span class="text-xs lowercase text-periwinkle-500">(<?= sprintf('v%s', $this->appConfig->appVersion) ?>)</span>
+                <span class="text-xs lowercase text-periwinkle-500">(<?= sprintf('v%s', $appVersion) ?>)</span>
             </h1>
         </div>
         <div id="add-checkin-btn" class="bg-opal-800 text-opal-50 font-bold p-4 rounded-lg w-full cursor-pointer text-center" role="button" tabindex="0" aria-controls="checkin-form-container" aria-expanded="false">
@@ -22,7 +22,6 @@ echo $this->render('header');
             id="checkin-form-container" class="hidden"><?php echo $this->render('components/check-in-form', [
                 'form' => $form,
                 'checkInOptions' => $checkInOptions,
-                'handlers' => $handlerService->getAllHandlers(),
                 'flash' => $flash,
             ]) ?>
         </div>
@@ -39,9 +38,7 @@ echo $this->render('header');
         <div
             class="grid gap-4 mt-4">
             <?php foreach ($checkIns as $checkIn) {
-                var_dump($checkIn);
                 echo $this->render('components/check-in-card', [
-                    'handlerService' => $handlerService,
                     'checkIn' => $checkIn,
                     'editLink' => "checkin/{$checkIn->uuid}/edit",
                 ]);
@@ -71,7 +68,6 @@ echo $this->render('header');
 
         <?php echo $this->render('components/top-handlers', [
             'topHandlers' => $topHandlers,
-            'handlerService' => $handlerService,
         ]) ?>
     </div>
 

@@ -9,8 +9,11 @@ use TynkaControlCenter\Common\Infrastructure\FileTranslator;
 use TynkaControlCenter\Config\AppConfig;
 use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
 use TynkaControlCenter\Handler\Infrastructure\InMemoryHandlerRepository;
-use TynkaControlCenter\Infrastructure\PhpTemplateEngine;
-use TynkaControlCenter\Services\CheckInService;
+use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInHandler;
+use TynkaControlCenter\CheckIn\Infrastructure\Persistence\PdoCheckInReadModel;
+use TynkaControlCenter\CheckIn\Infrastructure\Persistence\PdoCheckInRepository;
+use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
+use TynkaControlCenter\Infrastructure\Templating\PhpTemplateEngine;
 use TynkaControlCenter\Common\Domain\Translator;
 
 require_once dirname(__DIR__) . "/vendor/autoload.php";
@@ -55,17 +58,16 @@ $pdo = new PDO("{$appConfig->dbDriver}:{$appConfig->dbDatabase}");
 
 $inMemoryHandlerRepository = new InMemoryHandlerRepository();
 
-$checkInRepository = new \TynkaControlCenter\Repositories\CheckInRepository(
+$checkInRepository = new PdoCheckInRepository(
     $pdo,
     "checkins",
 );
-$handlerService = new \TynkaControlCenter\Services\HandlerService();
 $fileTranslator = new FileTranslator(
     __DIR__ . '/../resources/lang',
     $appConfig->locale,
     "en"
 );
-$checkInService = new CheckInService($checkInRepository);
+$recordCheckInHandler = new RecordCheckInHandler($checkInRepository);
 $getCheckInHandler = new GetCheckInHandler($checkInRepository);
 
 $getAllHandlersHandler = new GetAllHandlersHandler($inMemoryHandlerRepository);
@@ -80,16 +82,22 @@ $getAllCheckInOptionsHandler = new GetAllCheckInOptionsHandler(
     checkInOptionCategoryRepository: $inMemoryCheckInOptionCategoryRepository,
 );
 
+$checkInReadModel = new PdoCheckInReadModel($pdo, "checkins");
+
 $getAllCheckInsHandler = new GetAllCheckInsHandler(
-    pdo: $pdo,
+    readModel: $checkInReadModel,
     handlerRepository: $inMemoryHandlerRepository,
     checkInOptionRepository: $inMemoryCheckInOptionRepository,
     checkInOptionCategoryRepository: $inMemoryCheckInOptionCategoryRepository,
 );
 
+$getTopHandlersHandler = new GetTopHandlersHandler(
+    readModel: $checkInReadModel,
+    handlerRepository: $inMemoryHandlerRepository,
+);
+
 $checkInController = new CheckInController(
-    checkInService: $checkInService,
-    handlerService: $handlerService,
+    recordCheckInHandler: $recordCheckInHandler,
     translator: $fileTranslator,
     appConfig: $appConfig,
     viewRenderer: new PhpTemplateEngine(
@@ -99,8 +107,7 @@ $checkInController = new CheckInController(
     getCheckInHandler: $getCheckInHandler,
     getAllHandlersHandler: $getAllHandlersHandler,
     getAllCheckInOptionsHandler: $getAllCheckInOptionsHandler,
-    pdo: $pdo,
-    checkInOptionRepository: $inMemoryCheckInOptionRepository,
+    getTopHandlersHandler: $getTopHandlersHandler,
     getAllCheckInsHandler: $getAllCheckInsHandler,
 );
 

@@ -6,57 +6,57 @@ namespace TynkaControlCenter\Handler\Infrastructure;
 
 use TynkaControlCenter\Common\Domain\Avatar;
 use TynkaControlCenter\Handler\Domain\Handler;
+use TynkaControlCenter\Handler\Domain\HandlerId;
 use TynkaControlCenter\Handler\Domain\HandlerRepository;
-use TynkaControlCenter\Common\Domain\Slug;
 
 final class InMemoryHandlerRepository implements HandlerRepository
 {
-    /**
-     * @return Handler
-     */
-    public function findBySlug(Slug $slug): Handler
+    public function byId(HandlerId $id): ?Handler
     {
-        foreach ($this->find() as $handler) {
-            if ($handler->slug()->value() === $slug->value()) {
+        foreach ($this->findAll() as $handler) {
+            if ($handler->id()->equals($id)) {
                 return $handler;
             }
         }
 
-        throw new \RuntimeException("Handler '{$slug->value()}' not found.");
+        return null;
     }
 
-    public function find(): array
+    /**
+     * @return list<Handler>
+     */
+    public function findAll(): array
     {
         return [
-            new Handler(
-                name: 'Filip',
-                slug: new Slug('filip'),
-                avatar: new Avatar('abstract-avatar-01.jpg'),
+            Handler::reconstitute(
+                HandlerId::fromString('filip'),
+                'Filip',
+                new Avatar('abstract-avatar-01.jpg'),
             ),
-            new Handler(
-                name: 'Nathalie',
-                slug: new Slug('nathalie'),
-                avatar: new Avatar('abstract-avatar-02.jpg'),
+            Handler::reconstitute(
+                HandlerId::fromString('nathalie'),
+                'Nathalie',
+                new Avatar('abstract-avatar-02.jpg'),
             ),
-            new Handler(
-                name: 'Maya',
-                slug: new Slug('maya'),
-                avatar: new Avatar('abstract-avatar-03.jpg'),
+            Handler::reconstitute(
+                HandlerId::fromString('maya'),
+                'Maya',
+                new Avatar('abstract-avatar-03.jpg'),
             ),
-            new Handler(
-                name: 'Eline',
-                slug: new Slug('eline'),
-                avatar: new Avatar('abstract-avatar-04.jpg'),
+            Handler::reconstitute(
+                HandlerId::fromString('eline'),
+                'Eline',
+                new Avatar('abstract-avatar-04.jpg'),
             ),
-            new Handler(
-                name: 'Xander',
-                slug: new Slug('xander'),
-                avatar: new Avatar('abstract-avatar-05.jpg'),
+            Handler::reconstitute(
+                HandlerId::fromString('xander'),
+                'Xander',
+                new Avatar('abstract-avatar-05.jpg'),
             ),
-            new Handler(
-                name: 'Dog Sitter',
-                slug: new Slug('dog-sitter'),
-                avatar: new Avatar('abstract-avatar-05.jpg'),
+            Handler::reconstitute(
+                HandlerId::fromString('dog-sitter'),
+                'Dog Sitter',
+                new Avatar('abstract-avatar-05.jpg'),
             ),
         ];
     }

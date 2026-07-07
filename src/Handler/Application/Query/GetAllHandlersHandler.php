@@ -24,7 +24,7 @@ final readonly class GetAllHandlersHandler
             function (Handler $handler): HandlerData {
                 return HandlerData::fromDomain($handler);
             },
-            $this->handlerRepository->find()
+            $this->handlerRepository->findAll()
         );
     }
 }

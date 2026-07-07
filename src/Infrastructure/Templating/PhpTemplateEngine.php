@@ -1,12 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Infrastructure;
+namespace TynkaControlCenter\Infrastructure\Templating;
 
 use TynkaControlCenter\Config\AppConfig;
 
 final readonly class PhpTemplateEngine implements TemplateEngine
 {
+    /** @var array<string, mixed> */
     private array $globals;
 
     public function __construct(
@@ -20,9 +22,7 @@ final readonly class PhpTemplateEngine implements TemplateEngine
     }
 
     /**
-     * @param string $path
      * @param array<string, mixed> $data
-     * @return string
      */
     public function render(string $path, array $data = []): string
     {

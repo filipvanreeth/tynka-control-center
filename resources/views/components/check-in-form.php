@@ -1,6 +1,5 @@
 <?php
 /** @var $form */
-var_dump($form);
 ?>
 
 <div class="bg-white p-4 rounded-2xl border-2 border-opal-800">
@@ -39,9 +38,6 @@ var_dump($form);
             </li>
             <li class="flex flex-col gap-4 border-b border-opal-950 pb-4">
                 <label for="checkinAt" class="text-sm text-opal-300">At</label>
-                <?php
-                var_dump($form->data->createdAt);
-                ?>
                 <input type="datetime-local" id="checkInAt" name="checkInAt" required
                     class="flex-auto rounded-lg border border-opal-800 bg-opal-950/25 p-4 outline-none" value="<?= isset($form->data->createdAt) && !empty($form->data->createdAt)
                         ? $form->data->createdAt
@@ -54,16 +50,16 @@ var_dump($form);
                 $walkOptions = array_filter(
                     $form->options,
                     function ($checkInOption) {
-                        return $checkInOption->type()->name() === 'walking';
+                        return $checkInOption->category->slug === 'walking';
                     }
                 );
                 ?>
                 <div class="inline-flex flex-auto gap-x-4">
                     <?php foreach ($walkOptions as $walkOption): ?>
                         <div class="inline-flex gap-2 items-center">
-                            <input type="checkbox" name="<?= htmlspecialchars($walkOption->name()) ?>" value="1"
+                            <input type="checkbox" name="<?= htmlspecialchars($walkOption->slug) ?>" value="1"
                                 class="accent-opal-300 w-6 h-6" <?= $form->isOptionSelected($walkOption) ? 'checked' : '' ?>>
-                            <p><?= htmlspecialchars($walkOption->label()) ?></p>
+                            <p><?= htmlspecialchars($walkOption->title) ?></p>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -74,16 +70,16 @@ var_dump($form);
                 $careOptions = array_filter(
                     $form->options,
                     function ($checkInOption): bool {
-                        return $checkInOption->type()->name() === 'food';
+                        return $checkInOption->category->slug === 'food';
                     }
                 );
                 ?>
                 <div class="inline-flex gap-x-4">
                     <?php foreach ($careOptions as $careOption): ?>
                         <div class="inline-flex gap-2 items-center">
-                            <input type="checkbox" name="<?= htmlspecialchars($careOption->name()) ?>" value="1"
+                            <input type="checkbox" name="<?= htmlspecialchars($careOption->slug) ?>" value="1"
                                 class="accent-opal-300 w-6 h-6" <?= $form->isOptionSelected($careOption) ? 'checked' : '' ?>>
-                            <p><?= htmlspecialchars($careOption->label()) ?></p>
+                            <p><?= htmlspecialchars($careOption->title) ?></p>
                         </div>
                     <?php endforeach; ?>
                 </div>

@@ -10,7 +10,7 @@ final class GetStatisticsForCheckInOption
 {
     public function __construct(
         private readonly CheckInOptionRepository $checkInOptionRepository,
-        private readonly \PDO $pdo,
+        private readonly CheckInReadModel $readModel,
     ) {
     }
 
@@ -22,7 +22,7 @@ final class GetStatisticsForCheckInOption
         $foundOption = null;
 
         foreach ($this->checkInOptionRepository->findAll() as $validOption) {
-            if ($validOption->slug()->value() === $option) {
+            if ($validOption->id()->toString() === $option) {
                 $foundOption = $validOption;
                 break;
             }
@@ -32,19 +32,11 @@ final class GetStatisticsForCheckInOption
             throw new \InvalidArgumentException('Invalid check-in option: ' . $option);
         }
 
-        $statement = $this->pdo->prepare(
-            "SELECT COUNT(*) as total
-             FROM checkins
-             WHERE $option = 1"
-        );
-
-        $statement->execute();
-
-        $total = (int) $statement->fetchColumn();
+        $total = $this->readModel->totalForOption($option);
 
         // StatisticsCheckInOptionData
         return [
-            'name' => $foundOption->slug()->value(),
+            'name' => $foundOption->id()->toString(),
             'total' => $total,
         ];
     }

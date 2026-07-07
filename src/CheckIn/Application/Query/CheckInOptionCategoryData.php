@@ -21,7 +21,7 @@ final readonly class CheckInOptionCategoryData
     ): self {
         return new self(
             $domain->title()->forLocale($locale),
-            $domain->slug()->value()
+            $domain->id()->toString()
         );
     }
 }
