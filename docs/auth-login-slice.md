@@ -52,14 +52,18 @@ Access/Presentation/Web/
   admin-sectie/console accounts kan aanmaken.
 - **Klaar:** account in de DB; `AuthenticateUser` logt er end-to-end mee in (geverifieerd).
 
-### Stap D — Middleware-pijplijn (de kern van Fase 3)
-- Minimale PSR-15-achtige runner (hand-roll ~40 regels; ethos "losse componenten").
+### Stap D — Middleware-pijplijn (de kern van Fase 3) ✅
+- **Echte PSR-15** (`psr/http-server-middleware`). Zelf-gebouwde `MiddlewarePipeline`
+  (reuse-safe, ~40 regels) + `RouteDispatcher` als sluitstuk (FastRoute-logica uit
+  `index.php` gehaald; `FastRoute\Dispatcher` via container-factory).
 - `AuthenticationMiddleware`: leest `account_id` uit de sessie, laadt het account, hangt
   het als request-attribuut `currentAccount` (of `null`).
-- `AuthorizationMiddleware`: leest de rol-eis van de route; web → redirect naar `/login`,
-  API → 401/403 JSON. (Admin-rol-eis wordt straks door de admin-sectie gebruikt.)
-- Front controller (web): `authn → authz → dispatch`. **De `access_token`-hack verdwijnt.**
-- **Klaar:** unit-tests op beide middlewares (ingelogd / niet / verkeerde rol).
+- `AuthorizationMiddleware`: **path-based whitelist** — `/login` publiek, al de rest vereist
+  een account (302 → `/login`), `/admin/*` vereist `isAdmin()` (403). Fijnmazige per-route-
+  rollen later via route-metadata.
+- Front controller: `authn → authz → dispatch`. **De `access_token`-hack is verwijderd.**
+- **Klaar:** 11 unit-tests (pijplijn-volgorde/kortsluiten + beide middlewares) + herbruikbare
+  `SpyRequestHandler`-dubbel; end-to-end smoke: onauth `GET /` → 302 `/login`.
 
 ### Stap E — Login-UI + integratie
 - `LoginController` (GET `/login`, POST `/login`), `LogoutController` (POST `/logout`).

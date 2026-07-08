@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use FastRoute\Dispatcher;
 use Psr\Container\ContainerInterface;
 use TynkaControlCenter\Access\Domain\AccountRepository;
 use TynkaControlCenter\Access\Infrastructure\Persistence\PdoAccountRepository;
@@ -25,6 +26,7 @@ use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
 
 use function DI\autowire;
 use function DI\factory;
+use function FastRoute\simpleDispatcher;
 
 /*
  * PHP-DI container-definities. Enkel wat autowiring niet kan raden staat hier:
@@ -47,6 +49,11 @@ return [
         $config = $container->get(AppConfig::class);
 
         return new PDO("{$config->dbDriver}:{$config->dbDatabase}");
+    }),
+
+    // --- Routing -----------------------------------------------------------
+    Dispatcher::class => factory(static function (): Dispatcher {
+        return simpleDispatcher(require BASE_PATH . '/config/routes.php');
     }),
 
     // --- Poorten → Adapters ------------------------------------------------

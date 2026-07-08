@@ -3,15 +3,17 @@
 declare(strict_types=1);
 
 use Nyholm\Psr7\Factory\Psr17Factory;
-use Nyholm\Psr7\Response;
 use Nyholm\Psr7Server\ServerRequestCreator;
 use Psr\Container\ContainerInterface;
+use TynkaControlCenter\Access\Presentation\Http\AuthenticationMiddleware;
+use TynkaControlCenter\Access\Presentation\Http\AuthorizationMiddleware;
+use TynkaControlCenter\Infrastructure\Http\MiddlewarePipeline;
 use TynkaControlCenter\Infrastructure\Http\ResponseEmitter;
-use TynkaControlCenter\Infrastructure\Http\Session;
+use TynkaControlCenter\Infrastructure\Http\RouteDispatcher;
 
 /*
- * Web-entrypoint. Dun: gedeelde bootstrap → sessie (web-specifiek) → één keer de
- * globals inlezen → guard → routing → emit.
+ * Web-entrypoint. Dun: gedeelde bootstrap → sessie (web-specifiek) → globals
+ * inlezen → middleware-pijplijn (authenticatie → autorisatie → route-dispatch).
  */
 
 /** @var ContainerInterface $container */
@@ -30,48 +32,13 @@ $request = (new ServerRequestCreator(
     $psr17Factory,
 ))->fromGlobals();
 
-$emitter = $container->get(ResponseEmitter::class);
-$session = $container->get(Session::class);
-
-// --- Access guard: levert een Response i.p.v. echo + exit ---
-$accessToken = $request->getQueryParams()['access_token'] ?? null;
-
-if ($accessToken && $accessToken === ($_ENV['ACCESS_TOKEN'] ?? null)) {
-    $session->set('access_granted', true);
-}
-
-if (!$session->get('access_granted', false)) {
-    $emitter->emit(new Response(403, [], 'Access denied. Please provide a valid access token.'));
-
-    return;
-}
-
-// --- Routing ---
-$dispatcher = FastRoute\simpleDispatcher(
-    require BASE_PATH . '/config/routes.php',
+// --- Middleware-pijplijn met de route-dispatch als sluitstuk ---
+$pipeline = new MiddlewarePipeline(
+    [
+        $container->get(AuthenticationMiddleware::class),
+        $container->get(AuthorizationMiddleware::class),
+    ],
+    $container->get(RouteDispatcher::class),
 );
 
-$routeInfo = $dispatcher->dispatch(
-    $request->getMethod(),
-    rawurldecode($request->getUri()->getPath()),
-);
-
-if (FastRoute\Dispatcher::FOUND === $routeInfo[0]) {
-    // De route draagt de handler als [controller-klasse, methode]; de container
-    // resolvet de klasse (autowired), daarna roepen we de actie aan.
-    [$controllerClass, $method] = $routeInfo[1];
-
-    // Route-parameters ({id}) reizen mee als request-attributen (PSR-idioom).
-    foreach ($routeInfo[2] as $name => $value) {
-        $request = $request->withAttribute($name, $value);
-    }
-
-    $controller = $container->get($controllerClass);
-    $response = $controller->$method($request);
-} elseif (FastRoute\Dispatcher::METHOD_NOT_ALLOWED === $routeInfo[0]) {
-    $response = new Response(405);
-} else {
-    $response = new Response(404);
-}
-
-$emitter->emit($response);
+$container->get(ResponseEmitter::class)->emit($pipeline->handle($request));
