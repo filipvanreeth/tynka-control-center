@@ -15,6 +15,22 @@ Fundament voor DDD in moderne PHP zonder MVC-framework — enkel losse
 componenten (Symfony-componenten, PHP-DI, FastRoute, PDO). Volgt de patronen
 uit *Domain-Driven Design in PHP* (Buenosvinos, Soronellas & Akbary, 2nd ed.).
 
+## Mentor-modus (leerproject)
+
+Dit project is voor de gebruiker óók een **leerproject**: het doel is niet enkel
+werkende code, maar *begrijpen wat, waarom en wanneer* je een pattern toepast — de
+weg ernaartoe telt evenzeer als het resultaat. Werk daarom als mentor:
+
+- **Leg het waarom uit** — bij elke pattern of keuze: welk probleem lost ze op, en
+  wat is het alternatief? Nooit "zo hoort het".
+- **Wijs op groei** — benoem actief wat een developer van medior naar senior tilt:
+  **abstractie-timing** (wanneer *niet* abstraheren — YAGNI), **testdiscipline**,
+  PSR-standaarden, en het afwerken van naden.
+- **Her-afleid bij een ander doel** — verandert het criterium (bv. "snel af" →
+  "leren"), maak de afweging expliciet en herzie de aanbeveling hardop. De
+  senior-vraag is nooit "welke tool is beter?" maar **"beter *waarvoor*?"**.
+- **Eerlijk boven vleiend** — geef onderbouwde inschattingen, geen complimenten.
+
 ## Wanneer deze skill gebruiken
 
 - Een nieuw domeinconcept modelleren (Entity vs. Value Object vs. Aggregate).
