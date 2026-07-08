@@ -3,8 +3,8 @@
 ## Project
 
 PHP-applicatie gebouwd op DDD-principes met CQRS, **zonder MVC-framework**. Losse
-componenten: PHP-DI, FastRoute, phpdotenv, ramsey/uuid, PDO (SQLite) en plain-PHP
-templates (`PhpTemplateEngine`).
+componenten: PHP-DI, FastRoute, phpdotenv, ramsey/uuid, PDO (SQLite), Phinx (schema-
+migraties, `db/migrations/`) en plain-PHP templates (`PhpTemplateEngine`).
 
 - Namespace root: `TynkaControlCenter\` → `src/`
 - PHP 8.2+ · PHPStan level 9 · PHP_CodeSniffer · PHPUnit 12

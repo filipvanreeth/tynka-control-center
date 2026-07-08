@@ -43,10 +43,14 @@ Access/Presentation/Web/
   géén state-wijziging (de sessie zetten gebeurt aan de web-rand).
 - **Klaar:** test happy path + fout wachtwoord + onbekende email, met de in-memory repo.
 
-### Stap C — Seed van het eerste account
-- Zonder admin-UI/console kun je nog niet registreren → een eenmalig seed-scriptje
-  (`database/seed-account.php` of tijdelijk) maakt één admin-account.
-- **Klaar:** één account in de DB waarmee je in Stap D kunt inloggen.
+### Stap C — Seed van het eerste account ✅
+- **Phinx ingevoerd** voor schema-migraties (vervangt `database/migrate.php`): `phinx.php` +
+  `db/migrations/*` (checkins mét `food`/`snack`, accounts, alles `NOT NULL`). Dev-DB reset.
+- Seeding blijft **app-side** door het domein: `bin/seed-admin.php` maakt via de
+  `AccountRepository` één admin-account (idempotent, env-gedreven `SEED_ADMIN_*`) — géén raw
+  Phinx-insert, zodat `PasswordHash`/`Account::register` de invarianten bewaken. Wegwerp tot de
+  admin-sectie/console accounts kan aanmaken.
+- **Klaar:** account in de DB; `AuthenticateUser` logt er end-to-end mee in (geverifieerd).
 
 ### Stap D — Middleware-pijplijn (de kern van Fase 3)
 - Minimale PSR-15-achtige runner (hand-roll ~40 regels; ethos "losse componenten").
