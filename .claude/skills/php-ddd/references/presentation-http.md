@@ -129,6 +129,47 @@ hoort dus níét op die domein-poort, ook al is het verleidelijk omdat de adapte
 data toevallig heeft. Leidt zulke formattering af in de presentatielaag uit de
 locale. Test: *"zou het domein dit woord gebruiken?"* Nee → het is techniek/UI.
 
+## Input-validatie: twee lagen, niet verwarren
+
+"Validatie" is in DDD géén enkel ding maar **twee concerns op twee plekken**:
+
+| | Waar | Wat | Bij overtreding |
+| --- | --- | --- | --- |
+| **Vorm-/inputvalidatie** | Presentatie (boundary) | Is de payload welgevormd? Verplichte velden, parseerbare datum, types | **Gebruikersfout** → nette 4xx/flash |
+| **Domein-invarianten** | Domain (VO's + Aggregate) | Klopt de business-regel? | **Mag-niet-gebeuren** → domein-exceptie |
+
+Het is **defense in depth**: de VO's valideren altijd in hun constructor (laatste
+vangnet), en de boundary valideert de *vorm* vóór je de Command bouwt — zodat
+rommelige input geen `TypeError` of domein-exceptie wordt. Gooi *niet* alles in het
+domein (dan wordt "veld vergeten" een domein-exceptie), en maak het domein *niet*
+anemisch door alles in de controller te proppen.
+
+Praktisch: een **presentatie-input-object** (form) dat de raw array valideert
+volgens de **Notification-pattern** — verzamel *álle* fouten i.p.v. te stoppen bij de
+eerste — en óf een geldige Command óf een lijst fouten teruggeeft:
+
+```php
+$form = RecordCheckInForm::fromRequest((array) $request->getParsedBody());
+if ($form->command === null) {
+    // codes → tekst op de boundary (zie hieronder)
+    return $this->redirectWithErrors($form->errors);
+}
+$this->handler->handle($form->command);   // domein bewaakt de rest
+```
+
+**Foutmeldingen zijn codes, geen mensentaal.** Het form geeft stabiele vertaal-codes
+terug (`check_in.validation.handler_required`), niet "Kies een begeleider." Het
+*verwoorden* gebeurt aan de rand met de `Translator`. Dit is géén laaggrens-kwestie
+(het form ís presentatie), maar drie trade-offs: **formaat-onafhankelijkheid** (een
+code wordt HTML-flash, JSON-`{field, code}`, of logregel), **Single Responsibility**
+(valideren ≠ verwoorden), en **purity** (geen Translator/locale → puur, testbaar op
+codes). Dupliceer de domeinregels niet in het form: het form checkt *vorm*, het
+domein checkt *betekenis*.
+
+> Merk het onderscheid op met §6: presentatie op een domein-poort is een **harde**
+> afhankelijkheidsregel-schending; vertalen-in-het-form is slechts een **zwakkere
+> trade-off** (verdedigbaar, maar codes winnen). Niet elk "houd X uit Y" is even hard.
+
 ## Smell: hoge constructor-ariteit = God-controller
 
 Moet een test 9 collaborators optuigen om één actie te draaien, dan doet de
