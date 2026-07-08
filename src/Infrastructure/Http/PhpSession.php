@@ -22,6 +22,16 @@ final class PhpSession implements Session
         $_SESSION[$key] = $value;
     }
 
+    public function remove(string $key): void
+    {
+        unset($_SESSION[$key]);
+    }
+
+    public function regenerate(): void
+    {
+        session_regenerate_id(true);
+    }
+
     public function flash(string $type, string $message): void
     {
         $_SESSION['flash'] = ['type' => $type, 'message' => $message];

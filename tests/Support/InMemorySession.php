@@ -25,6 +25,16 @@ final class InMemorySession implements Session
         $this->data[$key] = $value;
     }
 
+    public function remove(string $key): void
+    {
+        unset($this->data[$key]);
+    }
+
+    public function regenerate(): void
+    {
+        // Geen sessie-id in het geheugen; data blijft behouden.
+    }
+
     public function flash(string $type, string $message): void
     {
         $this->data['flash'] = ['type' => $type, 'message' => $message];

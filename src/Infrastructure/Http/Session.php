@@ -18,6 +18,14 @@ interface Session
 
     public function set(string $key, mixed $value): void;
 
+    public function remove(string $key): void;
+
+    /**
+     * Vernieuwt het sessie-id met behoud van de data. Aanroepen bij een
+     * privilege-wissel (login/logout) tegen session fixation.
+     */
+    public function regenerate(): void;
+
     public function flash(string $type, string $message): void;
 
     /**

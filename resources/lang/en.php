@@ -20,4 +20,8 @@ return [
             'activity_required' => 'Please select at least one activity.',
         ],
     ],
+    'auth' => [
+        'invalid_credentials' => 'Invalid email or password.',
+        'signed_out' => 'You have been signed out.',
+    ],
 ];

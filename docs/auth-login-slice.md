@@ -65,14 +65,21 @@ Access/Presentation/Web/
 - **Klaar:** 11 unit-tests (pijplijn-volgorde/kortsluiten + beide middlewares) + herbruikbare
   `SpyRequestHandler`-dubbel; end-to-end smoke: onauth `GET /` → 302 `/login`.
 
-### Stap E — Login-UI + integratie
-- `LoginController` (GET `/login`, POST `/login`), `LogoutController` (POST `/logout`).
-- Routes in `routes/web.php`; login-view-template.
-- Bij succes: `$session->set('account_id', …)` → redirect `/`. Sessie-`access_granted`
-  vervalt; aanwezigheid van `account_id` is voortaan "ingelogd".
-- **Cadeautje:** check-in-`handler` niet langer vrij intypen maar = `currentAccount`'s
-  `HandlerId`; het tekstveld uit `RecordCheckInForm` verdwijnt.
-- **Klaar:** controller-test (login-succes/-mislukking) + CLAUDE.md/migratiestatus bijwerken.
+### Stap E — Login-UI + integratie ✅ (login-core)
+- `LoginController` (GET/POST `/login`), `LogoutController` (POST `/logout`) in
+  `Access/Presentation/Web/`; routes in `routes/web.php`; view `resources/views/auth/login.php`.
+- `Session`-poort uitgebreid met `remove()` + `regenerate()` (sessie-id vernieuwen bij
+  login/logout tegen session fixation). Auth-vertalingen in `resources/lang/{en,nl}.php`.
+- Bij succes: `regenerate()` → `account_id` in de sessie → redirect `/`. Aanwezigheid van
+  `account_id` is voortaan "ingelogd" (de `access_granted`-boolean is weg).
+- **Klaar:** 5 controller-tests (login-succes/-mislukking, showForm, logout) + end-to-end
+  flow tegen de DB geverifieerd.
+
+### Stap E-bis — Cadeautje (nog te doen)
+- Check-in-`handler` niet langer vrij intypen maar = `currentAccount`'s `HandlerId`; het
+  handler-veld uit `RecordCheckInForm` + de check-in-form-view verdwijnt. Raakt bestaande
+  CheckIn-code + tests → aparte, gefocuste stap.
+- Daarna: CLAUDE.md/migratiestatus bijwerken.
 
 ## Beslissingen om vroeg vast te leggen
 

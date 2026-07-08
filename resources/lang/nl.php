@@ -20,4 +20,8 @@ return [
             'activity_required' => 'Kies minstens één activiteit.',
         ],
     ],
+    'auth' => [
+        'invalid_credentials' => 'Ongeldig e-mailadres of wachtwoord.',
+        'signed_out' => 'Je bent uitgelogd.',
+    ],
 ];
