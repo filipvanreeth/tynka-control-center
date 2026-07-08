@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<ruleset name="TynkaControlCenter">
+    <description>PSR-12 coding standard voor TynkaControlCenter.</description>
+
+    <!-- Paden die standaard gecontroleerd worden (CLI-argumenten overschrijven dit). -->
+    <file>src</file>
+    <file>tests</file>
+
+    <!-- Toon kleuren en (s)niff-codes + (p)rogress. -->
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <!-- De moderne standaard voor PHP; vervangt de PEAR-fallback. -->
+    <rule ref="PSR12"/>
+</ruleset>

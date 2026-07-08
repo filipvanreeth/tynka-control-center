@@ -16,6 +16,8 @@ use TynkaControlCenter\Common\Infrastructure\FileTranslator;
 use TynkaControlCenter\Config\AppConfig;
 use TynkaControlCenter\Handler\Domain\HandlerRepository;
 use TynkaControlCenter\Handler\Infrastructure\InMemoryHandlerRepository;
+use TynkaControlCenter\Infrastructure\Http\PhpSession;
+use TynkaControlCenter\Infrastructure\Http\Session;
 use TynkaControlCenter\Infrastructure\Templating\PhpTemplateEngine;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
 
@@ -60,6 +62,8 @@ return [
 
     Translator::class => autowire(FileTranslator::class)
         ->constructorParameter('languagePath', BASE_PATH . '/resources/lang'),
+
+    Session::class => autowire(PhpSession::class),
 
     TemplateEngine::class => autowire(PhpTemplateEngine::class)
         ->constructorParameter('templatePath', BASE_PATH),

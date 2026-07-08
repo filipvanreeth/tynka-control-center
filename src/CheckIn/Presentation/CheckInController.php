@@ -1,24 +1,35 @@
 <?php
+
 declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Presentation;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesHandler;
-use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesQuery;
+use Nyholm\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInCommand;
 use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesQuery;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsQuery;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdQuery;
+use TynkaControlCenter\Common\Domain\Translator;
 use TynkaControlCenter\Config\AppConfig;
 use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
 use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
+use TynkaControlCenter\Infrastructure\Http\Session;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
-use TynkaControlCenter\Common\Domain\Translator;
 
+/**
+ * Elke actie is een functie van Request → Response: input komt binnen als
+ * argument, output gaat als returnwaarde naar buiten. Geen superglobals, geen
+ * `echo`, geen `exit()` — daardoor is de controller unit-testbaar en weet hij
+ * niets meer over de HTTP-machinerie (die zit in de front controller + emitter).
+ */
 class CheckInController
 {
     public function __construct(
@@ -30,15 +41,21 @@ class CheckInController
         public readonly GetAllHandlersHandler $getAllHandlersHandler,
         public readonly GetAllCheckInActivitiesHandler $getAllCheckInActivitiesHandler,
         public readonly GetTopHandlersHandler $getTopHandlersHandler,
-        private GetAllCheckInsHandler $getAllCheckInsHandler,
+        private readonly GetAllCheckInsHandler $getAllCheckInsHandler,
+        private readonly Session $session,
     ) {
     }
 
-    public function handleCheckInSubmission(): void
+    public function handleCheckInSubmission(ServerRequestInterface $request): ResponseInterface
     {
+        /** @var array<string, mixed> $body */
+        $body = (array) $request->getParsedBody();
+
+        // TODO (backlog B): input-validatie — $body['checkInAt']/'handler' worden
+        // nu nog blind vertrouwd; een ontbrekende waarde geeft een TypeError.
         $createdAt = DateTimeImmutable::createFromFormat(
             "Y-m-d\TH:i",
-            $_POST["checkInAt"],
+            (string) $body["checkInAt"],
             new DateTimeZone("Europe/Brussels"),
         )->setTimezone(new DateTimeZone("UTC"));
 
@@ -46,7 +63,7 @@ class CheckInController
 
         $selectedActivities = [];
         foreach (["peed", "pooped", "food", "snack"] as $activitySlug) {
-            if (!empty($_POST[$activitySlug])) {
+            if (!empty($body[$activitySlug])) {
                 $selectedActivities[] = $activitySlug;
             }
         }
@@ -54,32 +71,26 @@ class CheckInController
         try {
             $this->recordCheckInHandler->handle(
                 new RecordCheckInCommand(
-                    handler: $_POST["handler"],
+                    handler: (string) $body["handler"],
                     selectedActivities: $selectedActivities,
                     createdAt: $createdAt,
                 ),
             );
         } catch (\Exception $e) {
-            $_SESSION["flash"] = [
-                "type" => "error",
-                "message" => $e->getMessage(),
-            ];
+            $this->session->flash("error", $e->getMessage());
 
-            $this->redirectTo($redirectUrl);
+            return new Response(302, ["Location" => $redirectUrl]);
         }
 
-        $_SESSION["flash"] = [
-            "type" => "success",
-            "message" => "Check-in successful registered.",
-        ];
+        $this->session->flash("success", "Check-in successful registered.");
 
-        $this->redirectTo($redirectUrl);
+        return new Response(302, ["Location" => $redirectUrl]);
     }
 
-    public function index(): void
+    public function index(ServerRequestInterface $request): ResponseInterface
     {
-        $locale = \is_string($_SESSION['locale'] ?? null)
-            ? $_SESSION['locale']
+        $locale = \is_string($this->session->get('locale'))
+            ? $this->session->get('locale')
             : 'en';
 
         $checkInForm = new CheckInFormView(
@@ -101,10 +112,10 @@ class CheckInController
             checkInActivityStats: [],
             topHandlers: $this->getTopHandlersHandler->handle(),
             totalCheckIns: $allCheckIns->total,
-            flash: $this->pullFlashFromSession(),
+            flash: $this->session->pullFlash(),
         );
 
-        echo $this->viewRenderer->render("check-ins/index", [
+        $html = $this->viewRenderer->render("check-ins/index", [
             "form" => $indexModel->form,
             "checkIns" => $indexModel->checkIns,
             "checkInActivities" => $indexModel->form->activities,
@@ -113,17 +124,14 @@ class CheckInController
             "totalCheckIns" => $indexModel->totalCheckIns,
             "flash" => $indexModel->flash,
         ]);
+
+        return new Response(200, [], $html);
     }
 
-    /**
-     * Edits check-in data.
-     * @param array<string, mixed> $vars
-     * @return void
-     */
-    public function edit(array $vars): void
+    public function edit(ServerRequestInterface $request): ResponseInterface
     {
         $checkIn = $this->getCheckInHandler->handle(
-            new GetCheckInByIdQuery($vars["id"]),
+            new GetCheckInByIdQuery((string) $request->getAttribute('id')),
         );
 
         $formData = new CheckInFormView(
@@ -133,32 +141,15 @@ class CheckInController
             data: $checkIn,
         );
 
-        $htmlLang = $this->translator->getHtmlLang();
-
-        echo $this->viewRenderer->render(
+        $html = $this->viewRenderer->render(
             path: "check-ins/edit",
             data: [
-                "htmlLang" => $htmlLang,
+                "htmlLang" => $this->translator->getHtmlLang(),
                 "form" => $formData,
                 "viewRenderer" => $this->viewRenderer,
             ],
         );
-    }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function pullFlashFromSession(): ?array
-    {
-        $flash = $_SESSION["flash"] ?? null;
-        unset($_SESSION["flash"]);
-
-        return \is_array($flash) ? $flash : null;
-    }
-
-    private function redirectTo(string $url): void
-    {
-        header("Location: $url");
-        exit();
+        return new Response(200, [], $html);
     }
 }
