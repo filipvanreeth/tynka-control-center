@@ -39,7 +39,7 @@ final class CheckInControllerTest extends TestCase
         $request = (new ServerRequest('POST', '/checkin'))->withParsedBody([
             'handler' => '1',
             'checkInAt' => '2026-07-08T10:00',
-            // Bewust geen activiteiten: houdt het pad deterministisch groen.
+            'peed' => '1', // minstens één activiteit: vereist door de invariant
         ]);
 
         $response = $controller->handleCheckInSubmission($request);
@@ -97,6 +97,7 @@ final class CheckInControllerTest extends TestCase
                 $categoryRepository,
             ),
             session: $session,
+            activityRepository: $activityRepository,
         );
     }
 }

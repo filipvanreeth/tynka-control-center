@@ -5,11 +5,14 @@ declare(strict_types=1);
 use FastRoute\RouteCollector;
 
 /*
- * Routetabel. Handlers zijn logische namen; de front controller mapt ze
- * naar controller-methodes na dispatch.
+ * Aggregeert de route-tabellen per kanaal. Elk kanaal-bestand retourneert een
+ * closure die zijn routes op de collector registreert. Zo blijft de front
+ * controller onwetend van de kanaal-indeling: hij laadt enkel deze ene tabel.
  */
 return static function (RouteCollector $routeCollector): void {
-    $routeCollector->addRoute('POST', '/checkin', 'check-in.submit');
-    $routeCollector->addRoute('GET', '/', 'check-ins.index');
-    $routeCollector->addRoute('GET', '/checkin/{id}/edit', 'check-ins.edit');
+    $registerWebRoutes = require dirname(__DIR__) . '/routes/web.php';
+    $registerWebRoutes($routeCollector);
+
+    $registerApiRoutes = require dirname(__DIR__) . '/routes/api.php';
+    $registerApiRoutes($routeCollector);
 };

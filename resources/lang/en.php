@@ -12,4 +12,12 @@ return [
         'walking' => 'Walking',
         'food' => 'Food',
     ],
+    'check_in' => [
+        'recorded' => 'Check-in successfully registered.',
+        'validation' => [
+            'handler_required' => 'Please choose a handler.',
+            'moment_invalid' => 'Please provide a valid check-in moment.',
+            'activity_required' => 'Please select at least one activity.',
+        ],
+    ],
 ];

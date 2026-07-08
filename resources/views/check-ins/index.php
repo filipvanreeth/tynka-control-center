@@ -40,7 +40,7 @@ echo $this->render('header');
             <?php foreach ($checkIns as $checkIn) {
                 echo $this->render('components/check-in-card', [
                     'checkIn' => $checkIn,
-                    'editLink' => "checkin/{$checkIn->uuid}/edit",
+                    'editLink' => "checkin/{$checkIn->id}/edit",
                 ]);
             }
             ?>

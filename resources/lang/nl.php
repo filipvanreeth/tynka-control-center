@@ -12,4 +12,12 @@ return [
         'walking' => 'Wandelen',
         'food' => 'Voeding',
     ],
+    'check_in' => [
+        'recorded' => 'Check-in succesvol geregistreerd.',
+        'validation' => [
+            'handler_required' => 'Kies een begeleider.',
+            'moment_invalid' => 'Geef een geldig tijdstip op.',
+            'activity_required' => 'Kies minstens één activiteit.',
+        ],
+    ],
 ];

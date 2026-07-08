@@ -7,7 +7,7 @@ namespace TynkaControlCenter\CheckIn\Application\Query;
 final readonly class AllCheckInsData
 {
     /**
-     * @param list<int, CheckInData> $checkIns
+     * @param list<CheckInData> $checkIns
      * @param int $total
      */
     public function __construct(

@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Presentation;
 
-use DateTimeImmutable;
-use DateTimeZone;
 use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInCommand;
 use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesQuery;
@@ -17,6 +14,8 @@ use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsQuery;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdQuery;
+use TynkaControlCenter\CheckIn\Domain\CheckInActivity;
+use TynkaControlCenter\CheckIn\Domain\CheckInActivityRepository;
 use TynkaControlCenter\Common\Domain\Translator;
 use TynkaControlCenter\Config\AppConfig;
 use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
@@ -43,46 +42,45 @@ class CheckInController
         public readonly GetTopHandlersHandler $getTopHandlersHandler,
         private readonly GetAllCheckInsHandler $getAllCheckInsHandler,
         private readonly Session $session,
+        private readonly CheckInActivityRepository $activityRepository,
     ) {
     }
 
     public function handleCheckInSubmission(ServerRequestInterface $request): ResponseInterface
     {
-        /** @var array<string, mixed> $body */
-        $body = (array) $request->getParsedBody();
-
-        // TODO (backlog B): input-validatie — $body['checkInAt']/'handler' worden
-        // nu nog blind vertrouwd; een ontbrekende waarde geeft een TypeError.
-        $createdAt = DateTimeImmutable::createFromFormat(
-            "Y-m-d\TH:i",
-            (string) $body["checkInAt"],
-            new DateTimeZone("Europe/Brussels"),
-        )->setTimezone(new DateTimeZone("UTC"));
-
         $redirectUrl = $this->appConfig->appUrl . "/";
+        $locale = \is_string($this->session->get('locale'))
+            ? $this->session->get('locale')
+            : 'en';
 
-        $selectedActivities = [];
-        foreach (["peed", "pooped", "food", "snack"] as $activitySlug) {
-            if (!empty($body[$activitySlug])) {
-                $selectedActivities[] = $activitySlug;
-            }
+        $form = RecordCheckInForm::fromRequest(
+            body: (array) $request->getParsedBody(),
+            activityIds: array_map(
+                static fn(CheckInActivity $activity): string => $activity->id()->toString(),
+                $this->activityRepository->findAll(),
+            )
+        );
+
+        if ($form->command === null) {
+            $messages = array_map(
+                fn(string $code): string => $this->translator->translate($code, $locale),
+                $form->errors,
+            );
+            $this->session->flash("error", implode(' ', $messages));
+
+            return new Response(302, ["Location" => $redirectUrl]);
         }
 
         try {
-            $this->recordCheckInHandler->handle(
-                new RecordCheckInCommand(
-                    handler: (string) $body["handler"],
-                    selectedActivities: $selectedActivities,
-                    createdAt: $createdAt,
-                ),
-            );
+            $this->recordCheckInHandler->handle($form->command);
         } catch (\Exception $e) {
+            // Vangnet voor domein-invarianten die de vorm-validatie niet dekt.
             $this->session->flash("error", $e->getMessage());
 
             return new Response(302, ["Location" => $redirectUrl]);
         }
 
-        $this->session->flash("success", "Check-in successful registered.");
+        $this->session->flash("success", $this->translator->translate('check_in.recorded', $locale));
 
         return new Response(302, ["Location" => $redirectUrl]);
     }
@@ -94,7 +92,7 @@ class CheckInController
             : 'en';
 
         $checkInForm = new CheckInFormView(
-            action: "action",
+            action: "/checkin",
             handlers: $this->getAllHandlersHandler->handle(),
             activities: $this->getAllCheckInActivitiesHandler->handle(
                 new GetAllCheckInActivitiesQuery(locale: $locale)
@@ -135,14 +133,14 @@ class CheckInController
         );
 
         $formData = new CheckInFormView(
-            action: "checkin/{$checkIn->uuid}/edit",
+            action: "checkin/{$checkIn->id}/edit",
             handlers: $this->getAllHandlersHandler->handle(),
             activities: $this->getAllCheckInActivitiesHandler->handle(),
             data: $checkIn,
         );
 
         $html = $this->viewRenderer->render(
-            path: "check-ins/edit",
+            template: "check-ins/edit",
             data: [
                 "htmlLang" => $this->translator->getHtmlLang(),
                 "form" => $formData,

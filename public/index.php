@@ -2,29 +2,24 @@
 
 declare(strict_types=1);
 
-use DI\ContainerBuilder;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
 use Nyholm\Psr7Server\ServerRequestCreator;
-use TynkaControlCenter\CheckIn\Presentation\CheckInController;
+use Psr\Container\ContainerInterface;
 use TynkaControlCenter\Infrastructure\Http\ResponseEmitter;
 use TynkaControlCenter\Infrastructure\Http\Session;
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+/*
+ * Web-entrypoint. Dun: gedeelde bootstrap → sessie (web-specifiek) → één keer de
+ * globals inlezen → guard → routing → emit.
+ */
 
-define('BASE_PATH', dirname(__DIR__));
-define('VIEW_PATH', BASE_PATH . '/resources/views/');
-
-$dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
-$dotenv->load();
+/** @var ContainerInterface $container */
+$container = require dirname(__DIR__) . '/config/bootstrap.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-$container = (new ContainerBuilder())
-    ->addDefinitions(BASE_PATH . '/config/container.php')
-    ->build();
 
 // --- De onzuivere schil: superglobals één keer inlezen tot een PSR-7 request ---
 $psr17Factory = new Psr17Factory();
@@ -62,19 +57,17 @@ $routeInfo = $dispatcher->dispatch(
 );
 
 if (FastRoute\Dispatcher::FOUND === $routeInfo[0]) {
-    $controller = $container->get(CheckInController::class);
+    // De route draagt de handler als [controller-klasse, methode]; de container
+    // resolvet de klasse (autowired), daarna roepen we de actie aan.
+    [$controllerClass, $method] = $routeInfo[1];
 
     // Route-parameters ({id}) reizen mee als request-attributen (PSR-idioom).
     foreach ($routeInfo[2] as $name => $value) {
         $request = $request->withAttribute($name, $value);
     }
 
-    $response = match ($routeInfo[1]) {
-        'check-in.submit' => $controller->handleCheckInSubmission($request),
-        'check-ins.index' => $controller->index($request),
-        'check-ins.edit' => $controller->edit($request),
-        default => throw new RuntimeException("Unknown route handler: {$routeInfo[1]}"),
-    };
+    $controller = $container->get($controllerClass);
+    $response = $controller->$method($request);
 } elseif (FastRoute\Dispatcher::METHOD_NOT_ALLOWED === $routeInfo[0]) {
     $response = new Response(405);
 } else {

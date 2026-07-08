@@ -29,6 +29,10 @@ final class CheckIn extends AggregateRoot
         array $selectedActivities,
         DateTimeImmutable $createdAt,
     ): self {
+        if ($selectedActivities === []) {
+            throw InvalidCheckIn::withoutActivities();
+        }
+
         return new self(
             id: CheckInId::generate(),
             handlerId: $handlerId,
