@@ -80,6 +80,14 @@ weg ernaartoe telt evenzeer als het resultaat. Werk daarom als mentor:
 8. **Stijl** — `declare(strict_types=1)` overal; `final` tenzij overerving vereist
    is; named arguments bij >2 parameters; geen `var_dump`/`die()` in productiecode.
 
+9. **De HTTP-laag is óók Ports & Adapters** — een controller-actie is een functie
+   van `Request → Response` (PSR-7): geen superglobals, geen `echo`/`exit`. Lees de
+   globals één keer in de front controller (de onzuivere schil); de rest blijft
+   puur en testbaar. Sessie is een aparte **poort** (PSR-7 dekt ze niet).
+   Presentatie-formattering (HTML `lang`, datumnotatie) hoort in de presentatielaag,
+   **nooit** op een domein-poort. (Zie
+   [references/presentation-http.md](references/presentation-http.md).)
+
 ## Structuur van een bounded context
 
 ```
@@ -108,6 +116,10 @@ src/{Context}/
   richtlijnen voor ubiquitaire taal.
 - [references/migration.md](references/migration.md) — playbook om vanilla PHP
   gefaseerd (strangler-fig) naar DDD te migreren, met een concrete checklist.
+- [references/presentation-http.md](references/presentation-http.md) — de HTTP-laag
+  als Ports & Adapters: controllers als `Request → Response` (PSR-7), de sessie als
+  poort, de ResponseEmitter, de front controller als onzuivere schil, en waarom
+  presentatie-formattering buiten domein-poorten blijft. Mét codevoorbeelden.
 
 ## Snelle beslisboom
 
