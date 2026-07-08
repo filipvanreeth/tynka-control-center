@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
+use TynkaControlCenter\Access\Domain\AccountRepository;
+use TynkaControlCenter\Access\Infrastructure\Persistence\PdoAccountRepository;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInReadModel;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityCategoryRepository;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityRepository;
@@ -48,6 +50,9 @@ return [
     }),
 
     // --- Poorten → Adapters ------------------------------------------------
+    AccountRepository::class => autowire(PdoAccountRepository::class)
+        ->constructorParameter('tableName', 'accounts'),
+
     CheckInRepository::class => autowire(PdoCheckInRepository::class)
         ->constructorParameter('tableName', 'checkins'),
 

@@ -10,9 +10,9 @@ $pdo = new PDO(
     $databaseConfig['driver'] . ':' . $databaseConfig['database']
 );
 
-var_dump("Migrating database...");
+echo 'Migrating database...', PHP_EOL;
 
-$sql = <<<SQLite3
+$checkinsSql = <<<SQLite3
     CREATE TABLE IF NOT EXISTS checkins (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uuid TEXT NOT NULL UNIQUE,
@@ -24,4 +24,19 @@ $sql = <<<SQLite3
     );
 SQLite3;
 
-$pdo->exec($sql);
+$pdo->exec($checkinsSql);
+
+$accountsSql = <<<SQLite3
+    CREATE TABLE IF NOT EXISTS accounts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL,
+        handler_id TEXT NOT NULL
+    );
+SQLite3;
+
+$pdo->exec($accountsSql);
+
+echo 'Done.', PHP_EOL;
