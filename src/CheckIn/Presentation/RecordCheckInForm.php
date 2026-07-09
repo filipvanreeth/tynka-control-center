@@ -19,7 +19,7 @@ use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInCommand;
  * locale-onafhankelijke functie die triviaal op codes te testen is.
  *
  * Let op de taakverdeling: dit form checkt de *vorm*; de domein-Value-Objects
- * (`HandlerId`, `CheckInActivityId`) bewaken de *betekenis*. Dupliceer die
+ * (`UserId`, `CheckInActivityId`) bewaken de *betekenis*. Dupliceer die
  * domeinregels hier niet.
  */
 final class RecordCheckInForm

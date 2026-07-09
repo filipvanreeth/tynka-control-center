@@ -12,8 +12,8 @@ use TynkaControlCenter\CheckIn\Presentation\CheckInCardData;
 use TynkaControlCenter\CheckIn\Presentation\CheckInFormView;
 use TynkaControlCenter\CheckIn\Presentation\CheckInIndexView;
 use TynkaControlCenter\Common\Infrastructure\FileTranslator;
-use TynkaControlCenter\Handler\Application\Query\HandlerData;
-use TynkaControlCenter\Handler\Application\Query\TopHandlerData;
+use TynkaControlCenter\User\Application\Query\UserData;
+use TynkaControlCenter\User\Application\Query\TopUserData;
 use TynkaControlCenter\Infrastructure\Templating\TwigEnvironmentFactory;
 use TynkaControlCenter\Infrastructure\Templating\TwigTemplateEngine;
 
@@ -25,7 +25,7 @@ final class TwigDashboardRenderTest extends TestCase
 {
     public function testRendersTheFullDashboard(): void
     {
-        $handler = new HandlerData('Filip', 'filip', 'abstract-avatar-01.jpg');
+        $handler = new UserData('Filip', 'filip', 'abstract-avatar-01.jpg');
         $walking = new CheckInActivityCategoryData('Walking', 'walking');
         $food = new CheckInActivityCategoryData('Food', 'food');
         $peed = new CheckInActivityData('Peed', 'peed', $walking);
@@ -41,7 +41,7 @@ final class TwigDashboardRenderTest extends TestCase
             form: new CheckInFormView('/checkin', [$handler], [$peed, $snack], null),
             checkIns: [$card],
             checkInActivityStats: [['total' => 3, 'label' => 'Peed', 'colors' => 'border-opal-800']],
-            topHandlers: [new TopHandlerData($handler, 5)],
+            topUsers: [new TopUserData($handler, 5)],
             totalCheckIns: 1,
             flash: null,
         );

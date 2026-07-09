@@ -11,7 +11,7 @@ use TynkaControlCenter\Access\Domain\AccountRepository;
 use TynkaControlCenter\Access\Domain\Email;
 use TynkaControlCenter\Access\Domain\PasswordHash;
 use TynkaControlCenter\Access\Domain\Role;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 /**
  * Pdo-adapter voor de {@see AccountRepository}-poort. Vertaalt het domein ↔ de
@@ -38,7 +38,7 @@ final class PdoAccountRepository implements AccountRepository
             ':email' => $account->email()->toString(),
             ':password_hash' => $account->passwordHash()->toString(),
             ':role' => $account->role()->value,
-            ':handler_id' => $account->handlerId()->toString(),
+            ':handler_id' => $account->userId()->toString(),
         ]);
 
         if (!$executed) {
@@ -82,7 +82,7 @@ final class PdoAccountRepository implements AccountRepository
             email: Email::fromString((string) $row['email']),
             passwordHash: PasswordHash::fromHash((string) $row['password_hash']),
             role: Role::from((string) $row['role']),
-            handlerId: HandlerId::fromString((string) $row['handler_id']),
+            userId: UserId::fromString((string) $row['handler_id']),
         );
     }
 }

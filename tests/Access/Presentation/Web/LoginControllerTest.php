@@ -18,7 +18,7 @@ use TynkaControlCenter\Access\Presentation\Http\AuthenticationMiddleware;
 use TynkaControlCenter\Access\Presentation\Web\LoginController;
 use TynkaControlCenter\Common\Domain\Translator;
 use TynkaControlCenter\Config\AppConfig;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
 
 final class LoginControllerTest extends TestCase
@@ -101,7 +101,7 @@ final class LoginControllerTest extends TestCase
             Email::fromString('jan@tynka.be'),
             PasswordHash::fromPlainText('s3cret'),
             Role::Handler,
-            HandlerId::fromString('handler-1'),
+            UserId::fromString('handler-1'),
         );
         $accounts->save($account);
 

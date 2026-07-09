@@ -2,28 +2,28 @@
 
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Handler\Domain;
+namespace TynkaControlCenter\User\Domain;
 
 use TynkaControlCenter\Common\Domain\Avatar;
 
-final class Handler
+final class User
 {
     private function __construct(
-        private HandlerId $id,
+        private UserId $id,
         private string $name,
         private ?Avatar $avatar,
     ) {
     }
 
     public static function reconstitute(
-        HandlerId $id,
+        UserId $id,
         string $name,
         ?Avatar $avatar,
     ): self {
         return new self($id, $name, $avatar);
     }
 
-    public function id(): HandlerId
+    public function id(): UserId
     {
         return $this->id;
     }

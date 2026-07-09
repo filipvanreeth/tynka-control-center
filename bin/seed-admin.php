@@ -7,8 +7,8 @@ use TynkaControlCenter\Access\Application\RegisterAccount;
 use TynkaControlCenter\Access\Domain\AccountRepository;
 use TynkaControlCenter\Access\Domain\Email;
 use TynkaControlCenter\Access\Domain\Role;
-use TynkaControlCenter\Handler\Domain\HandlerId;
-use TynkaControlCenter\Handler\Domain\HandlerRepository;
+use TynkaControlCenter\User\Domain\UserId;
+use TynkaControlCenter\User\Domain\UserRepository;
 
 /*
  * Wegwerp-seed: maakt het EERSTE admin-account. Zodra user-beheer volstaat
@@ -23,12 +23,12 @@ $container = require dirname(__DIR__) . '/config/bootstrap.php';
 
 $email = $_ENV['SEED_ADMIN_EMAIL'] ?? 'admin@tynka.be';
 $password = $_ENV['SEED_ADMIN_PASSWORD'] ?? 'change-me';
-$handlerId = $_ENV['SEED_ADMIN_HANDLER_ID'] ?? 'filip';
+$userId = $_ENV['SEED_ADMIN_HANDLER_ID'] ?? 'filip';
 
 /** @var AccountRepository $accounts */
 $accounts = $container->get(AccountRepository::class);
-/** @var HandlerRepository $handlers */
-$handlers = $container->get(HandlerRepository::class);
+/** @var UserRepository $handlers */
+$handlers = $container->get(UserRepository::class);
 
 if ($accounts->byEmail(Email::fromString($email)) !== null) {
     echo "Account for {$email} already exists — skipping.", PHP_EOL;
@@ -36,17 +36,17 @@ if ($accounts->byEmail(Email::fromString($email)) !== null) {
     return;
 }
 
-if ($handlers->byId(HandlerId::fromString($handlerId)) === null) {
-    fwrite(STDERR, "Unknown handler '{$handlerId}' — cannot link account.\n");
+if ($handlers->byId(UserId::fromString($userId)) === null) {
+    fwrite(STDERR, "Unknown handler '{$userId}' — cannot link account.\n");
 
     exit(1);
 }
 
 /** @var RegisterAccount $registerAccount */
 $registerAccount = $container->get(RegisterAccount::class);
-$registerAccount($email, $password, Role::Admin, HandlerId::fromString($handlerId));
+$registerAccount($email, $password, Role::Admin, UserId::fromString($userId));
 
 echo 'Created admin account:', PHP_EOL;
 echo "  email:    {$email}", PHP_EOL;
 echo "  password: {$password}", PHP_EOL;
-echo "  handler:  {$handlerId}", PHP_EOL;
+echo "  handler:  {$userId}", PHP_EOL;

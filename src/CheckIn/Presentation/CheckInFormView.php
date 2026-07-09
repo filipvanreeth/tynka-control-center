@@ -6,13 +6,13 @@ namespace TynkaControlCenter\CheckIn\Presentation;
 
 use TynkaControlCenter\CheckIn\Application\Query\CheckInData;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInActivityData;
-use TynkaControlCenter\Handler\Application\Query\HandlerData;
+use TynkaControlCenter\User\Application\Query\UserData;
 
 final readonly class CheckInFormView
 {
     /**
      * @param string $action
-     * @param array<HandlerData> $handlers
+     * @param array<UserData> $handlers
      * @param array<CheckInActivityData> $activities
      * @param ?CheckInData $data
      */

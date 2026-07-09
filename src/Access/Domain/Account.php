@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\Access\Domain;
 
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 /**
  * Een account in de Access-context: iemand die kan inloggen. Bewust géén
- * `Handler` — het linkt via {@see HandlerId} naar de Handler-context (contexten
- * delen geen entities, enkel een id). Rol zit hier, niet op de Handler.
+ * `User`-object — het linkt via {@see UserId} naar de User-context (contexten
+ * delen geen entities, enkel een id). Rol zit hier, niet op de user.
  *
  * Auth is een generiek subdomein, dus dit is een dunne entity zonder Domain
  * Events of AggregateRoot-machinerie: net genoeg om te authenticeren en de rol +
@@ -22,7 +22,7 @@ final class Account
         private readonly Email $email,
         private readonly PasswordHash $passwordHash,
         private readonly Role $role,
-        private readonly HandlerId $handlerId,
+        private readonly UserId $userId,
     ) {
     }
 
@@ -30,14 +30,14 @@ final class Account
         Email $email,
         PasswordHash $passwordHash,
         Role $role,
-        HandlerId $handlerId,
+        UserId $userId,
     ): self {
         return new self(
             id: AccountId::generate(),
             email: $email,
             passwordHash: $passwordHash,
             role: $role,
-            handlerId: $handlerId,
+            userId: $userId,
         );
     }
 
@@ -46,14 +46,14 @@ final class Account
         Email $email,
         PasswordHash $passwordHash,
         Role $role,
-        HandlerId $handlerId,
+        UserId $userId,
     ): self {
         return new self(
             id: $id,
             email: $email,
             passwordHash: $passwordHash,
             role: $role,
-            handlerId: $handlerId,
+            userId: $userId,
         );
     }
 
@@ -87,8 +87,8 @@ final class Account
         return $this->role;
     }
 
-    public function handlerId(): HandlerId
+    public function userId(): UserId
     {
-        return $this->handlerId;
+        return $this->userId;
     }
 }

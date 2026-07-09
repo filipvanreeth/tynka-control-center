@@ -6,7 +6,7 @@ namespace TynkaControlCenter\CheckIn\Domain;
 
 use DateTimeImmutable;
 use TynkaControlCenter\Common\Domain\AggregateRoot;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 final class CheckIn extends AggregateRoot
 {
@@ -15,7 +15,7 @@ final class CheckIn extends AggregateRoot
      */
     private function __construct(
         private readonly CheckInId $id,
-        private readonly HandlerId $handlerId,
+        private readonly UserId $userId,
         private readonly array $selectedActivities,
         private readonly DateTimeImmutable $createdAt,
     ) {
@@ -25,7 +25,7 @@ final class CheckIn extends AggregateRoot
      * @param list<CheckInActivityId> $selectedActivities
      */
     public static function create(
-        HandlerId $handlerId,
+        UserId $userId,
         array $selectedActivities,
         DateTimeImmutable $createdAt,
     ): self {
@@ -35,7 +35,7 @@ final class CheckIn extends AggregateRoot
 
         return new self(
             id: CheckInId::generate(),
-            handlerId: $handlerId,
+            userId: $userId,
             selectedActivities: $selectedActivities,
             createdAt: $createdAt,
         );
@@ -46,13 +46,13 @@ final class CheckIn extends AggregateRoot
      */
     public static function reconstitute(
         CheckInId $id,
-        HandlerId $handlerId,
+        UserId $userId,
         array $selectedActivities,
         DateTimeImmutable $createdAt,
     ): self {
         return new self(
             id: $id,
-            handlerId: $handlerId,
+            userId: $userId,
             selectedActivities: $selectedActivities,
             createdAt: $createdAt,
         );
@@ -63,9 +63,9 @@ final class CheckIn extends AggregateRoot
         return $this->id;
     }
 
-    public function handlerId(): HandlerId
+    public function userId(): UserId
     {
-        return $this->handlerId;
+        return $this->userId;
     }
 
     /**

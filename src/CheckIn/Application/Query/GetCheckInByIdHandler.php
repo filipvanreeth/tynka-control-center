@@ -9,15 +9,15 @@ use TynkaControlCenter\CheckIn\Domain\CheckInActivityCategoryRepository;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityId;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityRepository;
 use TynkaControlCenter\Common\Domain\Locale;
-use TynkaControlCenter\Handler\Application\Query\HandlerData;
-use TynkaControlCenter\Handler\Domain\HandlerId;
-use TynkaControlCenter\Handler\Domain\HandlerRepository;
+use TynkaControlCenter\User\Application\Query\UserData;
+use TynkaControlCenter\User\Domain\UserId;
+use TynkaControlCenter\User\Domain\UserRepository;
 
 final class GetCheckInByIdHandler
 {
     public function __construct(
         private readonly CheckInReadModel $readModel,
-        private readonly HandlerRepository $handlerRepository,
+        private readonly UserRepository $userRepository,
         private readonly CheckInActivityRepository $checkInActivityRepository,
         private readonly CheckInActivityCategoryRepository $checkInActivityCategoryRepository,
     ) {
@@ -35,21 +35,21 @@ final class GetCheckInByIdHandler
 
         return new CheckInData(
             id: $row['uuid'],
-            handler: $this->resolveHandler($row['handler']),
+            handler: $this->resolveUser($row['handler']),
             activities: $this->resolveActivities($row, $locale),
             createdAt: (new DateTimeImmutable($row['created_at']))->format('Y-m-d H:i'),
         );
     }
 
-    private function resolveHandler(string $handlerId): HandlerData
+    private function resolveUser(string $userId): UserData
     {
-        $handler = $this->handlerRepository->byId(HandlerId::fromString($handlerId));
+        $handler = $this->userRepository->byId(UserId::fromString($userId));
 
         if ($handler === null) {
-            return new HandlerData(name: $handlerId, id: $handlerId, avatar: null);
+            return new UserData(name: $userId, id: $userId, avatar: null);
         }
 
-        return HandlerData::fromDomain($handler);
+        return UserData::fromDomain($handler);
     }
 
     /**

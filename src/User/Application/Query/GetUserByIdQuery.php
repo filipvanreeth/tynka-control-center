@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Handler\Application\Query;
+namespace TynkaControlCenter\User\Application\Query;
 
-final readonly class GetHandlerByIdQuery
+final readonly class GetUserByIdQuery
 {
     public function __construct(
         public string $id,

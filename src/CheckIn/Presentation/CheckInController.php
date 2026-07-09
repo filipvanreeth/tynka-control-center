@@ -18,7 +18,7 @@ use TynkaControlCenter\CheckIn\Domain\CheckInActivity;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityRepository;
 use TynkaControlCenter\Common\Domain\Translator;
 use TynkaControlCenter\Config\AppConfig;
-use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
+use TynkaControlCenter\User\Application\Query\GetAllUsersHandler;
 use TynkaControlCenter\Infrastructure\Http\Session;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
 
@@ -36,7 +36,7 @@ class CheckInController
         public readonly AppConfig $appConfig,
         public readonly TemplateEngine $viewRenderer,
         public readonly GetCheckInByIdHandler $getCheckInHandler,
-        public readonly GetAllHandlersHandler $getAllHandlersHandler,
+        public readonly GetAllUsersHandler $getAllUsersHandler,
         public readonly GetAllCheckInActivitiesHandler $getAllCheckInActivitiesHandler,
         private readonly GetCheckInDashboardHandler $dashboard,
         private readonly Session $session,
@@ -107,7 +107,7 @@ class CheckInController
             ),
             checkIns: $cards,
             checkInActivityStats: $dashboard->activityStats,
-            topHandlers: $dashboard->topHandlers,
+            topUsers: $dashboard->topUsers,
             totalCheckIns: $dashboard->totalCheckIns,
             flash: $this->session->pullFlash(),
         );
@@ -133,7 +133,7 @@ class CheckInController
 
         $formData = new CheckInFormView(
             action: "checkin/{$checkIn->id}/edit",
-            handlers: $this->getAllHandlersHandler->handle(),
+            handlers: $this->getAllUsersHandler->handle(),
             activities: $this->getAllCheckInActivitiesHandler->handle(
                 new GetAllCheckInActivitiesQuery(locale: $locale)
             ),

@@ -13,20 +13,20 @@ use TynkaControlCenter\CheckIn\Application\Query\GetCheckInDashboardQuery;
 use TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInActivityCategoryRepository;
 use TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInActivityRepository;
 use TynkaControlCenter\CheckIn\Infrastructure\Persistence\PdoCheckInReadModel;
-use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
-use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
-use TynkaControlCenter\Handler\Infrastructure\InMemoryHandlerRepository;
+use TynkaControlCenter\User\Application\Query\GetAllUsersHandler;
+use TynkaControlCenter\User\Application\Query\GetTopUsersHandler;
+use TynkaControlCenter\User\Infrastructure\InMemoryUserRepository;
 
 /**
  * Integratie-stijl (de sub-handlers zijn `final`, dus niet te stubben): met één
  * geseede check-in zijn de secties onderscheidbaar in aantal, zodat een verkeerde
- * veld-mapping (bv. checkIns ↔ topHandlers omwisselen) opvalt.
+ * veld-mapping (bv. checkIns ↔ topUsers omwisselen) opvalt.
  */
 final class GetCheckInDashboardHandlerTest extends TestCase
 {
     public function testComposesEverySectionIntoOneDto(): void
     {
-        $handlerRepository = new InMemoryHandlerRepository();
+        $userRepository = new InMemoryUserRepository();
         $activityRepository = new InMemoryCheckInActivityRepository();
         $categoryRepository = new InMemoryCheckInActivityCategoryRepository();
 
@@ -44,17 +44,17 @@ final class GetCheckInDashboardHandlerTest extends TestCase
         $readModel = new PdoCheckInReadModel($pdo, 'checkins');
 
         $dashboard = new GetCheckInDashboardHandler(
-            new GetAllHandlersHandler($handlerRepository),
+            new GetAllUsersHandler($userRepository),
             new GetAllCheckInActivitiesHandler($activityRepository, $categoryRepository),
-            new GetAllCheckInsHandler($readModel, $handlerRepository, $activityRepository, $categoryRepository),
-            new GetTopHandlersHandler($readModel, $handlerRepository),
+            new GetAllCheckInsHandler($readModel, $userRepository, $activityRepository, $categoryRepository),
+            new GetTopUsersHandler($readModel, $userRepository),
         );
 
         $data = $dashboard->handle(new GetCheckInDashboardQuery('en'));
 
         self::assertCount(1, $data->checkIns);
         self::assertSame(1, $data->totalCheckIns);
-        self::assertCount(1, $data->topHandlers);
+        self::assertCount(1, $data->topUsers);
         self::assertGreaterThan(1, \count($data->handlers));
         self::assertNotEmpty($data->activities);
         self::assertSame([], $data->activityStats);

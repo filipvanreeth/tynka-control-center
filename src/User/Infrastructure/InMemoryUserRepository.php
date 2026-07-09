@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Handler\Infrastructure;
+namespace TynkaControlCenter\User\Infrastructure;
 
 use TynkaControlCenter\Common\Domain\Avatar;
-use TynkaControlCenter\Handler\Domain\Handler;
-use TynkaControlCenter\Handler\Domain\HandlerId;
-use TynkaControlCenter\Handler\Domain\HandlerRepository;
+use TynkaControlCenter\User\Domain\User;
+use TynkaControlCenter\User\Domain\UserId;
+use TynkaControlCenter\User\Domain\UserRepository;
 
-final class InMemoryHandlerRepository implements HandlerRepository
+final class InMemoryUserRepository implements UserRepository
 {
-    public function byId(HandlerId $id): ?Handler
+    public function byId(UserId $id): ?User
     {
         foreach ($this->findAll() as $handler) {
             if ($handler->id()->equals($id)) {
@@ -23,38 +23,38 @@ final class InMemoryHandlerRepository implements HandlerRepository
     }
 
     /**
-     * @return list<Handler>
+     * @return list<User>
      */
     public function findAll(): array
     {
         return [
-            Handler::reconstitute(
-                HandlerId::fromString('filip'),
+            User::reconstitute(
+                UserId::fromString('filip'),
                 'Filip',
                 new Avatar('abstract-avatar-01.jpg'),
             ),
-            Handler::reconstitute(
-                HandlerId::fromString('nathalie'),
+            User::reconstitute(
+                UserId::fromString('nathalie'),
                 'Nathalie',
                 new Avatar('abstract-avatar-02.jpg'),
             ),
-            Handler::reconstitute(
-                HandlerId::fromString('maya'),
+            User::reconstitute(
+                UserId::fromString('maya'),
                 'Maya',
                 new Avatar('abstract-avatar-03.jpg'),
             ),
-            Handler::reconstitute(
-                HandlerId::fromString('eline'),
+            User::reconstitute(
+                UserId::fromString('eline'),
                 'Eline',
                 new Avatar('abstract-avatar-04.jpg'),
             ),
-            Handler::reconstitute(
-                HandlerId::fromString('xander'),
+            User::reconstitute(
+                UserId::fromString('xander'),
                 'Xander',
                 new Avatar('abstract-avatar-05.jpg'),
             ),
-            Handler::reconstitute(
-                HandlerId::fromString('dog-sitter'),
+            User::reconstitute(
+                UserId::fromString('dog-sitter'),
                 'Dog Sitter',
                 new Avatar('abstract-avatar-05.jpg'),
             ),

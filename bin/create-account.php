@@ -7,13 +7,13 @@ use TynkaControlCenter\Access\Application\RegisterAccount;
 use TynkaControlCenter\Access\Domain\EmailAlreadyRegistered;
 use TynkaControlCenter\Access\Domain\InvalidEmail;
 use TynkaControlCenter\Access\Domain\Role;
-use TynkaControlCenter\Handler\Domain\HandlerId;
-use TynkaControlCenter\Handler\Domain\HandlerRepository;
+use TynkaControlCenter\User\Domain\UserId;
+use TynkaControlCenter\User\Domain\UserRepository;
 
 /*
  * CLI om een account met een rol aan te maken:
  *
- *   php bin/create-account.php <email> <password> <role> <handlerId>
+ *   php bin/create-account.php <email> <password> <role> <userId>
  *
  * De daadwerkelijke creatie loopt door de RegisterAccount-service (uniek e-mail +
  * hashing via het domein). Dit script doet enkel de I/O en de cross-context
@@ -27,10 +27,10 @@ $container = require dirname(__DIR__) . '/config/bootstrap.php';
 $email = $argv[1] ?? null;
 $password = $argv[2] ?? null;
 $roleArg = $argv[3] ?? null;
-$handlerId = $argv[4] ?? null;
+$userId = $argv[4] ?? null;
 
-if ($email === null || $password === null || $roleArg === null || $handlerId === null) {
-    fwrite(STDERR, "Usage: php bin/create-account.php <email> <password> <role> <handlerId>\n");
+if ($email === null || $password === null || $roleArg === null || $userId === null) {
+    fwrite(STDERR, "Usage: php bin/create-account.php <email> <password> <role> <userId>\n");
     fwrite(STDERR, '       role is one of: ' . implode(', ', array_column(Role::cases(), 'value')) . "\n");
 
     exit(1);
@@ -44,11 +44,11 @@ if ($role === null) {
     exit(1);
 }
 
-/** @var HandlerRepository $handlers */
-$handlers = $container->get(HandlerRepository::class);
+/** @var UserRepository $handlers */
+$handlers = $container->get(UserRepository::class);
 
-if ($handlers->byId(HandlerId::fromString($handlerId)) === null) {
-    fwrite(STDERR, "Unknown handler '{$handlerId}' — cannot link account.\n");
+if ($handlers->byId(UserId::fromString($userId)) === null) {
+    fwrite(STDERR, "Unknown handler '{$userId}' — cannot link account.\n");
 
     exit(1);
 }
@@ -57,7 +57,7 @@ if ($handlers->byId(HandlerId::fromString($handlerId)) === null) {
 $registerAccount = $container->get(RegisterAccount::class);
 
 try {
-    $registerAccount($email, $password, $role, HandlerId::fromString($handlerId));
+    $registerAccount($email, $password, $role, UserId::fromString($userId));
 } catch (InvalidEmail | EmailAlreadyRegistered $e) {
     fwrite(STDERR, $e->getMessage() . "\n");
 
@@ -67,4 +67,4 @@ try {
 echo 'Created account:', PHP_EOL;
 echo "  email:    {$email}", PHP_EOL;
 echo "  role:     {$role->value}", PHP_EOL;
-echo "  handler:  {$handlerId}", PHP_EOL;
+echo "  handler:  {$userId}", PHP_EOL;

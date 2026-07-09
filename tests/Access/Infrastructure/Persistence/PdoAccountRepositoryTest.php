@@ -11,7 +11,7 @@ use TynkaControlCenter\Access\Domain\Email;
 use TynkaControlCenter\Access\Domain\PasswordHash;
 use TynkaControlCenter\Access\Domain\Role;
 use TynkaControlCenter\Access\Infrastructure\Persistence\PdoAccountRepository;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 /**
  * Roundtrip-test tegen een in-memory SQLite: bewijst dat de adapter het domein
@@ -31,7 +31,7 @@ final class PdoAccountRepositoryTest extends TestCase
         self::assertTrue($found->id()->equals($account->id()));
         self::assertTrue($found->verifyPassword('s3cret'));
         self::assertTrue($found->isAdmin());
-        self::assertSame('handler-1', $found->handlerId()->toString());
+        self::assertSame('handler-1', $found->userId()->toString());
     }
 
     public function testSavesAndFindsById(): void
@@ -59,7 +59,7 @@ final class PdoAccountRepositoryTest extends TestCase
             Email::fromString('jan@tynka.be'),
             PasswordHash::fromPlainText('s3cret'),
             $role,
-            HandlerId::fromString('handler-1'),
+            UserId::fromString('handler-1'),
         );
     }
 

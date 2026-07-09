@@ -17,8 +17,8 @@ use TynkaControlCenter\CheckIn\Infrastructure\Persistence\PdoCheckInRepository;
 use TynkaControlCenter\Common\Domain\Translator;
 use TynkaControlCenter\Common\Infrastructure\FileTranslator;
 use TynkaControlCenter\Config\AppConfig;
-use TynkaControlCenter\Handler\Domain\HandlerRepository;
-use TynkaControlCenter\Handler\Infrastructure\InMemoryHandlerRepository;
+use TynkaControlCenter\User\Domain\UserRepository;
+use TynkaControlCenter\User\Infrastructure\InMemoryUserRepository;
 use TynkaControlCenter\Infrastructure\Http\PhpSession;
 use TynkaControlCenter\Infrastructure\Http\Session;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
@@ -72,7 +72,7 @@ return [
 
     CheckInActivityCategoryRepository::class => autowire(InMemoryCheckInActivityCategoryRepository::class),
 
-    HandlerRepository::class => autowire(InMemoryHandlerRepository::class),
+    UserRepository::class => autowire(InMemoryUserRepository::class),
 
     Translator::class => autowire(FileTranslator::class)
         ->constructorParameter('languagePath', BASE_PATH . '/resources/lang'),

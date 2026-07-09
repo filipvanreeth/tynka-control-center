@@ -11,7 +11,7 @@ use TynkaControlCenter\Access\Domain\Account;
 use TynkaControlCenter\Access\Domain\Email;
 use TynkaControlCenter\Access\Domain\PasswordHash;
 use TynkaControlCenter\Access\Domain\Role;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 final class AuthenticateUserTest extends TestCase
 {
@@ -20,7 +20,7 @@ final class AuthenticateUserTest extends TestCase
         $result = $this->authenticateWith('jan@tynka.be', 's3cret');
 
         self::assertNotNull($result);
-        self::assertSame('handler-1', $result->handlerId()->toString());
+        self::assertSame('handler-1', $result->userId()->toString());
     }
 
     public function testRejectsAWrongPassword(): void
@@ -45,7 +45,7 @@ final class AuthenticateUserTest extends TestCase
             Email::fromString('jan@tynka.be'),
             PasswordHash::fromPlainText('s3cret'),
             Role::Handler,
-            HandlerId::fromString('handler-1'),
+            UserId::fromString('handler-1'),
         ));
 
         return (new AuthenticateUser($accounts))($email, $plainPassword);

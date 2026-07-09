@@ -20,9 +20,9 @@ use TynkaControlCenter\CheckIn\Infrastructure\Persistence\PdoCheckInReadModel;
 use TynkaControlCenter\CheckIn\Presentation\CheckInController;
 use TynkaControlCenter\Common\Domain\Translator;
 use TynkaControlCenter\Config\AppConfig;
-use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
-use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
-use TynkaControlCenter\Handler\Infrastructure\InMemoryHandlerRepository;
+use TynkaControlCenter\User\Application\Query\GetAllUsersHandler;
+use TynkaControlCenter\User\Application\Query\GetTopUsersHandler;
+use TynkaControlCenter\User\Infrastructure\InMemoryUserRepository;
 use TynkaControlCenter\Infrastructure\Http\Session;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
 
@@ -64,7 +64,7 @@ final class CheckInControllerTest extends TestCase
      */
     private function makeController(Session $session): CheckInController
     {
-        $handlerRepository = new InMemoryHandlerRepository();
+        $userRepository = new InMemoryUserRepository();
         $activityRepository = new InMemoryCheckInActivityRepository();
         $categoryRepository = new InMemoryCheckInActivityCategoryRepository();
         $readModel = new PdoCheckInReadModel(new PDO('sqlite::memory:'), 'checkins');
@@ -81,20 +81,20 @@ final class CheckInControllerTest extends TestCase
             viewRenderer: $this->createStub(TemplateEngine::class),
             getCheckInHandler: new GetCheckInByIdHandler(
                 $readModel,
-                $handlerRepository,
+                $userRepository,
                 $activityRepository,
                 $categoryRepository,
             ),
-            getAllHandlersHandler: new GetAllHandlersHandler($handlerRepository),
+            getAllUsersHandler: new GetAllUsersHandler($userRepository),
             getAllCheckInActivitiesHandler: new GetAllCheckInActivitiesHandler(
                 $activityRepository,
                 $categoryRepository,
             ),
             dashboard: new GetCheckInDashboardHandler(
-                new GetAllHandlersHandler($handlerRepository),
+                new GetAllUsersHandler($userRepository),
                 new GetAllCheckInActivitiesHandler($activityRepository, $categoryRepository),
-                new GetAllCheckInsHandler($readModel, $handlerRepository, $activityRepository, $categoryRepository),
-                new GetTopHandlersHandler($readModel, $handlerRepository),
+                new GetAllCheckInsHandler($readModel, $userRepository, $activityRepository, $categoryRepository),
+                new GetTopUsersHandler($readModel, $userRepository),
             ),
             session: $session,
             activityRepository: $activityRepository,

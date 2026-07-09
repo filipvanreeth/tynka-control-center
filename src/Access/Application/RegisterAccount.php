@@ -10,7 +10,7 @@ use TynkaControlCenter\Access\Domain\Email;
 use TynkaControlCenter\Access\Domain\EmailAlreadyRegistered;
 use TynkaControlCenter\Access\Domain\PasswordHash;
 use TynkaControlCenter\Access\Domain\Role;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 /**
  * Applicatie-geval dat één account met een rol aanmaakt. Bewust in dezelfde stijl
@@ -20,7 +20,7 @@ use TynkaControlCenter\Handler\Domain\HandlerId;
  * Enige plek waar de Access-invarianten van accountcreatie samenkomen (uniek
  * e-mailadres, hashing via het domein). De handler-bestaat-check is cross-context
  * orkestratie en blijft bij de aanroeper (het CLI-entrypoint) — deze service raakt
- * enkel de gedeelde {@see HandlerId}-identiteit, niet de Handler-repository.
+ * enkel de gedeelde {@see UserId}-identiteit, niet de User-repository.
  */
 final class RegisterAccount
 {
@@ -33,7 +33,7 @@ final class RegisterAccount
         string $email,
         string $plainPassword,
         Role $role,
-        HandlerId $handlerId,
+        UserId $userId,
     ): Account {
         $emailVo = Email::fromString($email);
 
@@ -45,7 +45,7 @@ final class RegisterAccount
             $emailVo,
             PasswordHash::fromPlainText($plainPassword),
             $role,
-            $handlerId,
+            $userId,
         );
 
         $this->accounts->save($account);

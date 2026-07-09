@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Handler\Domain;
+namespace TynkaControlCenter\User\Domain;
 
-final class HandlerId
+final class UserId
 {
     private function __construct(private readonly string $value)
     {
         if (trim($value) === '') {
-            throw InvalidHandlerId::emptyValue();
+            throw InvalidUserId::emptyValue();
         }
     }
 

@@ -7,19 +7,19 @@
         <p class="mt-1 mb-4 text-sm text-gray-400">Total check-ins by handler</p>
     </div>
     <div class="bg-white border-2 border-periwinkle-800 p-4 mb-8 rounded-xl">
-        {% if topHandlers is empty %}
+        {% if topUsers is empty %}
             <p class="text-gray-500 text-sm">No check-ins recorded yet.</p>
         {% else %}
             <ol class="flex flex-col gap-2">
-                {% for topHandler in topHandlers %}
+                {% for topUser in topUsers %}
                     <li class="flex items-center gap-4 border-b border-periwinkle-800/25 pb-2 last-of-type:border-0 last-of-type:pb-0">
-                        {% if topHandler.handler.avatar %}
-                            <img src="{{ app_url }}/assets/images/{{ topHandler.handler.avatar }}" alt="{{ topHandler.handler.name }}" class="w-8 h-8 rounded-lg object-cover">
+                        {% if topUser.handler.avatar %}
+                            <img src="{{ app_url }}/assets/images/{{ topUser.handler.avatar }}" alt="{{ topUser.handler.name }}" class="w-8 h-8 rounded-lg object-cover">
                         {% else %}
-                            <div class="w-8 h-8 rounded-lg bg-periwinkle-800 flex items-center justify-center">{{ topHandler.handler.name|first }}</div>
+                            <div class="w-8 h-8 rounded-lg bg-periwinkle-800 flex items-center justify-center">{{ topUser.handler.name|first }}</div>
                         {% endif %}
-                        <span class="grow font-bold">{{ topHandler.handler.name }}</span>
-                        <span class="text-periwinkle-100">{{ topHandler.total }}</span>
+                        <span class="grow font-bold">{{ topUser.handler.name }}</span>
+                        <span class="text-periwinkle-100">{{ topUser.total }}</span>
                     </li>
                 {% endfor %}
             </ol>

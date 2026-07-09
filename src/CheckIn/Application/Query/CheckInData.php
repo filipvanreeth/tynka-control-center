@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Application\Query;
 
-use TynkaControlCenter\Handler\Application\Query\HandlerData;
+use TynkaControlCenter\User\Application\Query\UserData;
 
 final readonly class CheckInData
 {
@@ -13,7 +13,7 @@ final readonly class CheckInData
      */
     public function __construct(
         public string $id,
-        public HandlerData $handler,
+        public UserData $handler,
         public array $activities,
         public string $createdAt,
     ) {

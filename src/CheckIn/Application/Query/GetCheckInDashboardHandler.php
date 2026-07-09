@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace TynkaControlCenter\CheckIn\Application\Query;
 
-use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
-use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
+use TynkaControlCenter\User\Application\Query\GetAllUsersHandler;
+use TynkaControlCenter\User\Application\Query\GetTopUsersHandler;
 
 /**
  * Read-use-case voor de check-in-dashboardpagina: bundelt de losse queries tot
@@ -15,10 +15,10 @@ use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
 final class GetCheckInDashboardHandler
 {
     public function __construct(
-        private readonly GetAllHandlersHandler $handlers,
+        private readonly GetAllUsersHandler $handlers,
         private readonly GetAllCheckInActivitiesHandler $activities,
         private readonly GetAllCheckInsHandler $checkIns,
-        private readonly GetTopHandlersHandler $topHandlers,
+        private readonly GetTopUsersHandler $topUsers,
     ) {
     }
 
@@ -31,7 +31,7 @@ final class GetCheckInDashboardHandler
             activities: $this->activities->handle(new GetAllCheckInActivitiesQuery($query->locale)),
             checkIns: $checkIns->checkIns,
             totalCheckIns: $checkIns->total,
-            topHandlers: $this->topHandlers->handle(),
+            topUsers: $this->topUsers->handle(),
             activityStats: [],
         );
     }

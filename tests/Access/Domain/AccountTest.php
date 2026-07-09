@@ -9,7 +9,7 @@ use TynkaControlCenter\Access\Domain\Account;
 use TynkaControlCenter\Access\Domain\Email;
 use TynkaControlCenter\Access\Domain\PasswordHash;
 use TynkaControlCenter\Access\Domain\Role;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 final class AccountTest extends TestCase
 {
@@ -35,7 +35,7 @@ final class AccountTest extends TestCase
     {
         $account = $this->register(Role::Handler);
 
-        self::assertSame('handler-1', $account->handlerId()->toString());
+        self::assertSame('handler-1', $account->userId()->toString());
     }
 
     private function register(Role $role, string $password = 's3cret'): Account
@@ -44,7 +44,7 @@ final class AccountTest extends TestCase
             Email::fromString('jan@tynka.be'),
             PasswordHash::fromPlainText($password),
             $role,
-            HandlerId::fromString('handler-1'),
+            UserId::fromString('handler-1'),
         );
     }
 }

@@ -10,7 +10,7 @@ use TynkaControlCenter\CheckIn\Domain\CheckIn;
 use TynkaControlCenter\CheckIn\Domain\CheckInId;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityId;
 use TynkaControlCenter\CheckIn\Domain\CheckInRepository;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 final class PdoCheckInRepository implements CheckInRepository
 {
@@ -36,7 +36,7 @@ final class PdoCheckInRepository implements CheckInRepository
 
         $executed = $stmt->execute([
             ':uuid' => $checkIn->id()->toString(),
-            ':handler' => $checkIn->handlerId()->toString(),
+            ':handler' => $checkIn->userId()->toString(),
             ':peed' => \in_array('peed', $selectedSlugs, true) ? 1 : 0,
             ':pooped' => \in_array('pooped', $selectedSlugs, true) ? 1 : 0,
             ':food' => \in_array('food', $selectedSlugs, true) ? 1 : 0,
@@ -73,7 +73,7 @@ final class PdoCheckInRepository implements CheckInRepository
 
         return CheckIn::reconstitute(
             id: CheckInId::fromString((string) $row['uuid']),
-            handlerId: HandlerId::fromString($row['handler']),
+            userId: UserId::fromString($row['handler']),
             selectedActivities: $selectedActivities,
             createdAt: new DateTimeImmutable($row['created_at']),
         );

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Handler\Application\Query;
+namespace TynkaControlCenter\User\Application\Query;
 
-use TynkaControlCenter\Handler\Domain\Handler;
+use TynkaControlCenter\User\Domain\User;
 
-final readonly class HandlerData
+final readonly class UserData
 {
     public function __construct(
         public string $name,
@@ -15,7 +15,7 @@ final readonly class HandlerData
     ) {
     }
 
-    public static function fromDomain(Handler $domain): self
+    public static function fromDomain(User $domain): self
     {
         return new self(
             name: $domain->name(),

@@ -15,7 +15,7 @@ use TynkaControlCenter\Access\Domain\Email;
 use TynkaControlCenter\Access\Domain\PasswordHash;
 use TynkaControlCenter\Access\Domain\Role;
 use TynkaControlCenter\Access\Presentation\Http\AuthenticationMiddleware;
-use TynkaControlCenter\Handler\Domain\HandlerId;
+use TynkaControlCenter\User\Domain\UserId;
 
 final class AuthenticationMiddlewareTest extends TestCase
 {
@@ -72,7 +72,7 @@ final class AuthenticationMiddlewareTest extends TestCase
             Email::fromString('jan@tynka.be'),
             PasswordHash::fromPlainText('s3cret'),
             Role::Handler,
-            HandlerId::fromString('handler-1'),
+            UserId::fromString('handler-1'),
         );
     }
 }

@@ -2,35 +2,35 @@
 
 declare(strict_types=1);
 
-namespace TynkaControlCenter\Handler\Application\Query;
+namespace TynkaControlCenter\User\Application\Query;
 
 use TynkaControlCenter\CheckIn\Application\Query\CheckInReadModel;
-use TynkaControlCenter\Handler\Domain\HandlerRepository;
+use TynkaControlCenter\User\Domain\UserRepository;
 
-final class GetTopHandlersHandler
+final class GetTopUsersHandler
 {
     public function __construct(
         private readonly CheckInReadModel $readModel,
-        private readonly HandlerRepository $handlerRepository
+        private readonly UserRepository $userRepository
     ) {
     }
 
     /**
-     * @return list<TopHandlerData>
+     * @return list<TopUserData>
      */
     public function handle(): array
     {
         $handlers = $this->readModel->handlerCounts(5);
-        $getHandlerById = new GetHandlerByIdHandler($this->handlerRepository);
+        $getUserById = new GetUserByIdHandler($this->userRepository);
 
         return array_map(
-            function (array $row) use ($getHandlerById): TopHandlerData {
-                $handler = $getHandlerById->handle(
-                    new GetHandlerByIdQuery($row['handler'])
+            function (array $row) use ($getUserById): TopUserData {
+                $handler = $getUserById->handle(
+                    new GetUserByIdQuery($row['handler'])
                 );
 
-                return new TopHandlerData(
-                    handler: $handler ?? new HandlerData(
+                return new TopUserData(
+                    handler: $handler ?? new UserData(
                         name: $row['handler'],
                         id: $row['handler'],
                         avatar: null,

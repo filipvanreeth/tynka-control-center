@@ -7,7 +7,7 @@ namespace TynkaControlCenter\CheckIn\Presentation;
 use DateTimeImmutable;
 use DateTimeZone;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInData;
-use TynkaControlCenter\Handler\Application\Query\HandlerData;
+use TynkaControlCenter\User\Application\Query\UserData;
 
 /**
  * Display-ready view-model voor één check-in-card. Trekt de relatieve-datum-logica
@@ -22,7 +22,7 @@ final readonly class CheckInCardData
      */
     private function __construct(
         public string $id,
-        public HandlerData $handler,
+        public UserData $handler,
         public array $activityIds,
         public string $displayDate,
         public string $dateColor,
