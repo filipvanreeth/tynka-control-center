@@ -3,19 +3,19 @@
 declare(strict_types=1);
 
 use Psr\Container\ContainerInterface;
-use TynkaControlCenter\Access\Domain\Account;
+use TynkaControlCenter\Access\Application\RegisterAccount;
 use TynkaControlCenter\Access\Domain\AccountRepository;
 use TynkaControlCenter\Access\Domain\Email;
-use TynkaControlCenter\Access\Domain\PasswordHash;
 use TynkaControlCenter\Access\Domain\Role;
 use TynkaControlCenter\Handler\Domain\HandlerId;
 use TynkaControlCenter\Handler\Domain\HandlerRepository;
 
 /*
- * Wegwerp-seed: maakt het EERSTE admin-account. Zodra de admin-sectie accounts
- * kan aanmaken (of het console-luik er is), verdwijnt dit. Bewust app-side —
- * door het domein (Account::register + PasswordHash), niet via een raw insert —
- * zodat wachtwoord-hashing en invarianten gerespecteerd blijven.
+ * Wegwerp-seed: maakt het EERSTE admin-account. Zodra user-beheer volstaat
+ * (bin/create-account.php of de admin-sectie), verdwijnt dit. De creatie loopt
+ * door RegisterAccount — dezelfde codepad als de CLI — zodat hashing en
+ * invarianten hier niet apart worden herhaald. Dit script houdt enkel z'n
+ * idempotente 'bestaat al → skip' + de handler-check.
  */
 
 /** @var ContainerInterface $container */
@@ -30,9 +30,7 @@ $accounts = $container->get(AccountRepository::class);
 /** @var HandlerRepository $handlers */
 $handlers = $container->get(HandlerRepository::class);
 
-$emailVo = Email::fromString($email);
-
-if ($accounts->byEmail($emailVo) !== null) {
+if ($accounts->byEmail(Email::fromString($email)) !== null) {
     echo "Account for {$email} already exists — skipping.", PHP_EOL;
 
     return;
@@ -44,12 +42,9 @@ if ($handlers->byId(HandlerId::fromString($handlerId)) === null) {
     exit(1);
 }
 
-$accounts->save(Account::register(
-    $emailVo,
-    PasswordHash::fromPlainText($password),
-    Role::Admin,
-    HandlerId::fromString($handlerId),
-));
+/** @var RegisterAccount $registerAccount */
+$registerAccount = $container->get(RegisterAccount::class);
+$registerAccount($email, $password, Role::Admin, HandlerId::fromString($handlerId));
 
 echo 'Created admin account:', PHP_EOL;
 echo "  email:    {$email}", PHP_EOL;

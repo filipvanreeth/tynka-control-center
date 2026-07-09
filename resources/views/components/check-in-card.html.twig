@@ -1,31 +1,17 @@
 {#
-  Let op: dit template draagt nog presentatie-logica (relatieve datum, activiteit-
-  vlaggen) die eigenlijk in een card-view-model hoort (zie strategic-design.md:
-  templates lezen display-ready DTO's). Bewuste follow-up, buiten deze Twig-migratie.
-  De createdAt-string is UTC; we tonen 'm in Europe/Brussels — net als de oude view.
+  Presentatie-DTO: check-in-card leest enkel display-ready properties (CheckInCardData).
+  De relatieve-datum-logica en label-vertaling zitten server-side in de presentatielaag,
+  niet meer in dit template.
 #}
-{% set created = checkIn.createdAt ~ ' UTC' %}
-{% set day = created|date('Y-m-d', 'Europe/Brussels') %}
-{% if day == 'now'|date('Y-m-d', 'Europe/Brussels') %}
-    {% set displayDate = 'Today - ' ~ created|date('H:i', 'Europe/Brussels') %}
-    {% set dateColor = 'text-opal-500' %}
-{% elseif day == '-1 day'|date('Y-m-d', 'Europe/Brussels') %}
-    {% set displayDate = 'Yesterday - ' ~ created|date('H:i', 'Europe/Brussels') %}
-    {% set dateColor = 'text-periwinkle-500' %}
-{% else %}
-    {% set displayDate = created|date('j F Y - H:i', 'Europe/Brussels') %}
-    {% set dateColor = 'text-gray-500' %}
-{% endif %}
-
-{% set activityIds = checkIn.activities|map(activity => activity.id) %}
+{% set activityIds = checkIn.activityIds %}
 
 <div class="rounded-xl bg-white p-4 first-of-type:border-2 first-of-type:border-opal-800 first-of-type:bg-opal-950/50">
     <div class="flex items-center gap-4">
         <div class="">
-            <img src="{{ checkIn.handler.avatar ? appUrl ~ '/assets/images/' ~ checkIn.handler.avatar : '' }}" class="bg-gray-200 border-none rounded-xl w-12 h-12">
+            <img src="{{ checkIn.handler.avatar ? app_url ~ '/assets/images/' ~ checkIn.handler.avatar : '' }}" class="bg-gray-200 border-none rounded-xl w-12 h-12">
         </div>
         <div class="flex-auto">
-            <p class="{{ dateColor }} text-sm">{{ displayDate }}</p>
+            <p class="{{ checkIn.dateColor }} text-sm">{{ checkIn.displayDate }}</p>
             <h3 class="font-bold text-lg">{{ checkIn.handler.name }}</h3>
         </div>
         <div class="flex-auto flex justify-end gap-1.5">

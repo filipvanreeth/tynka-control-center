@@ -91,6 +91,13 @@ class CheckInController
 
         $dashboard = $this->dashboard->handle(new GetCheckInDashboardQuery($locale));
 
+        $todayLabel = $this->translator->translate('check_in.card.today', $locale);
+        $yesterdayLabel = $this->translator->translate('check_in.card.yesterday', $locale);
+        $cards = array_map(
+            fn ($checkIn): CheckInCardData => CheckInCardData::fromData($checkIn, $todayLabel, $yesterdayLabel),
+            $dashboard->checkIns,
+        );
+
         $view = new CheckInIndexView(
             form: new CheckInFormView(
                 action: "/checkin",
@@ -98,7 +105,7 @@ class CheckInController
                 activities: $dashboard->activities,
                 data: null,
             ),
-            checkIns: $dashboard->checkIns,
+            checkIns: $cards,
             checkInActivityStats: $dashboard->activityStats,
             topHandlers: $dashboard->topHandlers,
             totalCheckIns: $dashboard->totalCheckIns,

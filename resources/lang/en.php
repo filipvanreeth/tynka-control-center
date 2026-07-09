@@ -19,6 +19,19 @@ return [
             'moment_invalid' => 'Please provide a valid check-in moment.',
             'activity_required' => 'Please select at least one activity.',
         ],
+        'dashboard' => [
+            'add' => 'Add Check-In',
+            'check_ins' => 'Check-ins',
+            'check_ins_subtitle' => "Tynka's latest check-ins",
+            'refresh' => 'Refresh',
+            'statistics' => 'Statistics',
+            'statistics_subtitle' => "Tynka's check-in statistics",
+            'total' => 'Total check-ins',
+        ],
+        'card' => [
+            'today' => 'Today',
+            'yesterday' => 'Yesterday',
+        ],
     ],
     'auth' => [
         'invalid_credentials' => 'Invalid email or password.',

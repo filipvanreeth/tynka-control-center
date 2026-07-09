@@ -22,9 +22,9 @@ use TynkaControlCenter\Handler\Infrastructure\InMemoryHandlerRepository;
 use TynkaControlCenter\Infrastructure\Http\PhpSession;
 use TynkaControlCenter\Infrastructure\Http\Session;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
+use TynkaControlCenter\Infrastructure\Templating\TwigEnvironmentFactory;
 use TynkaControlCenter\Infrastructure\Templating\TwigTemplateEngine;
 use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
 
 use function DI\autowire;
 use function DI\factory;
@@ -83,9 +83,15 @@ return [
     Environment::class => factory(static function (ContainerInterface $container): Environment {
         $config = $container->get(AppConfig::class);
         $isDev = ($_ENV['APP_ENVIRONMENT'] ?? 'production') === 'development';
+        $session = $container->get(Session::class);
+        $locale = $session->get('locale') ?? $config->locale;
 
-        $twig = new Environment(
-            new FilesystemLoader(BASE_PATH . '/resources/views'),
+        return TwigEnvironmentFactory::create(
+            BASE_PATH . '/resources/views',
+            $container->get(Translator::class),
+            $config->appUrl,
+            $config->appVersion,
+            $locale,
             [
                 'cache' => BASE_PATH . '/storage/cache/twig',
                 'auto_reload' => true,
@@ -93,11 +99,6 @@ return [
                 'strict_variables' => $isDev,
             ],
         );
-        $twig->addGlobal('appUrl', $config->appUrl);
-        $twig->addGlobal('appVersion', $config->appVersion);
-        $twig->addGlobal('app_locale', $config->locale);
-
-        return $twig;
     }),
 
     TemplateEngine::class => autowire(TwigTemplateEngine::class),

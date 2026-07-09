@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Infrastructure\Templating;
 
 use PHPUnit\Framework\TestCase;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
+use TynkaControlCenter\Common\Infrastructure\FileTranslator;
+use TynkaControlCenter\Infrastructure\Templating\TwigEnvironmentFactory;
 use TynkaControlCenter\Infrastructure\Templating\TwigTemplateEngine;
 
 final class TwigTemplateEngineTest extends TestCase
@@ -31,13 +31,14 @@ final class TwigTemplateEngineTest extends TestCase
 
     private function engine(): TwigTemplateEngine
     {
-        $twig = new Environment(
-            new FilesystemLoader(dirname(__DIR__, 3) . '/resources/views'),
-            ['strict_variables' => true],
+        $twig = TwigEnvironmentFactory::create(
+            dirname(__DIR__, 3) . '/resources/views',
+            new FileTranslator(dirname(__DIR__, 3) . '/resources/lang'),
+            appUrl: 'https://app.test',
+            appVersion: '0',
+            locale: 'en',
+            options: ['strict_variables' => true],
         );
-        $twig->addGlobal('appUrl', 'https://app.test');
-        $twig->addGlobal('appVersion', '0');
-        $twig->addGlobal('app_locale', 'en');
 
         return new TwigTemplateEngine($twig);
     }

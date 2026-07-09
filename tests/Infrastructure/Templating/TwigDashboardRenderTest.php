@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace App\Tests\Infrastructure\Templating;
 
 use PHPUnit\Framework\TestCase;
-use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInActivityCategoryData;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInActivityData;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInData;
+use TynkaControlCenter\CheckIn\Presentation\CheckInCardData;
 use TynkaControlCenter\CheckIn\Presentation\CheckInFormView;
 use TynkaControlCenter\CheckIn\Presentation\CheckInIndexView;
+use TynkaControlCenter\Common\Infrastructure\FileTranslator;
 use TynkaControlCenter\Handler\Application\Query\HandlerData;
 use TynkaControlCenter\Handler\Application\Query\TopHandlerData;
+use TynkaControlCenter\Infrastructure\Templating\TwigEnvironmentFactory;
 use TynkaControlCenter\Infrastructure\Templating\TwigTemplateEngine;
 
 /**
@@ -30,9 +31,15 @@ final class TwigDashboardRenderTest extends TestCase
         $peed = new CheckInActivityData('Peed', 'peed', $walking);
         $snack = new CheckInActivityData('Snack', 'snack', $food);
 
+        $card = CheckInCardData::fromData(
+            new CheckInData('uuid-1', $handler, [$peed], '2020-01-15 08:00'),
+            todayLabel: 'Today',
+            yesterdayLabel: 'Yesterday',
+        );
+
         $view = new CheckInIndexView(
             form: new CheckInFormView('/checkin', [$handler], [$peed, $snack], null),
-            checkIns: [new CheckInData('uuid-1', $handler, [$peed], '2020-01-15 08:00')],
+            checkIns: [$card],
             checkInActivityStats: [['total' => 3, 'label' => 'Peed', 'colors' => 'border-opal-800']],
             topHandlers: [new TopHandlerData($handler, 5)],
             totalCheckIns: 1,
@@ -44,19 +51,21 @@ final class TwigDashboardRenderTest extends TestCase
         self::assertStringContainsString('<html lang="en">', $html);
         self::assertStringContainsString('Filip', $html);
         self::assertStringContainsString('15 January 2020', $html);
+        self::assertStringContainsString('Add Check-In', $html);
         self::assertStringContainsString('Total check-ins: 1', $html);
         self::assertStringContainsString('Peed', $html);
     }
 
     private function engine(): TwigTemplateEngine
     {
-        $twig = new Environment(
-            new FilesystemLoader(dirname(__DIR__, 3) . '/resources/views'),
-            ['strict_variables' => true],
+        $twig = TwigEnvironmentFactory::create(
+            dirname(__DIR__, 3) . '/resources/views',
+            new FileTranslator(dirname(__DIR__, 3) . '/resources/lang'),
+            appUrl: 'https://app.test',
+            appVersion: '0.1.9',
+            locale: 'en',
+            options: ['strict_variables' => true],
         );
-        $twig->addGlobal('appUrl', 'https://app.test');
-        $twig->addGlobal('appVersion', '0.1.9');
-        $twig->addGlobal('app_locale', 'en');
 
         return new TwigTemplateEngine($twig);
     }

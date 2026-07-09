@@ -19,6 +19,19 @@ return [
             'moment_invalid' => 'Geef een geldig tijdstip op.',
             'activity_required' => 'Kies minstens één activiteit.',
         ],
+        'dashboard' => [
+            'add' => 'Check-in toevoegen',
+            'check_ins' => 'Check-ins',
+            'check_ins_subtitle' => 'Tynka\'s recentste check-ins',
+            'refresh' => 'Vernieuwen',
+            'statistics' => 'Statistieken',
+            'statistics_subtitle' => 'Tynka\'s check-in-statistieken',
+            'total' => 'Totaal check-ins',
+        ],
+        'card' => [
+            'today' => 'Vandaag',
+            'yesterday' => 'Gisteren',
+        ],
     ],
     'auth' => [
         'invalid_credentials' => 'Ongeldig e-mailadres of wachtwoord.',

@@ -14,7 +14,7 @@
                 {% for topHandler in topHandlers %}
                     <li class="flex items-center gap-4 border-b border-periwinkle-800/25 pb-2 last-of-type:border-0 last-of-type:pb-0">
                         {% if topHandler.handler.avatar %}
-                            <img src="{{ appUrl }}/assets/images/{{ topHandler.handler.avatar }}" alt="{{ topHandler.handler.name }}" class="w-8 h-8 rounded-lg object-cover">
+                            <img src="{{ app_url }}/assets/images/{{ topHandler.handler.avatar }}" alt="{{ topHandler.handler.name }}" class="w-8 h-8 rounded-lg object-cover">
                         {% else %}
                             <div class="w-8 h-8 rounded-lg bg-periwinkle-800 flex items-center justify-center">{{ topHandler.handler.name|first }}</div>
                         {% endif %}
