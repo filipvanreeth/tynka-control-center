@@ -18,8 +18,6 @@ final class AuthenticateUser
 
     public function __invoke(string $email, string $plainPassword): ?Account
     {
-        // Elke mislukking — ongeldige vorm, onbekend adres, fout wachtwoord —
-        // geeft uniform null terug, zodat de rand niet kan lekken wélke faalde.
         try {
             $account = $this->accounts->byEmail(Email::fromString($email));
         } catch (InvalidEmail) {
