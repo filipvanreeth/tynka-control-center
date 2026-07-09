@@ -13,6 +13,7 @@ use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetCheckInDashboardHandler;
 use TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInActivityCategoryRepository;
 use TynkaControlCenter\CheckIn\Infrastructure\InMemoryCheckInActivityRepository;
 use TynkaControlCenter\CheckIn\Infrastructure\Persistence\PdoCheckInReadModel;
@@ -89,12 +90,11 @@ final class CheckInControllerTest extends TestCase
                 $activityRepository,
                 $categoryRepository,
             ),
-            getTopHandlersHandler: new GetTopHandlersHandler($readModel, $handlerRepository),
-            getAllCheckInsHandler: new GetAllCheckInsHandler(
-                $readModel,
-                $handlerRepository,
-                $activityRepository,
-                $categoryRepository,
+            dashboard: new GetCheckInDashboardHandler(
+                new GetAllHandlersHandler($handlerRepository),
+                new GetAllCheckInActivitiesHandler($activityRepository, $categoryRepository),
+                new GetAllCheckInsHandler($readModel, $handlerRepository, $activityRepository, $categoryRepository),
+                new GetTopHandlersHandler($readModel, $handlerRepository),
             ),
             session: $session,
             activityRepository: $activityRepository,

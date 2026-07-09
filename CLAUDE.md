@@ -4,7 +4,7 @@
 
 PHP-applicatie gebouwd op DDD-principes met CQRS, **zonder MVC-framework**. Losse
 componenten: PHP-DI, FastRoute, phpdotenv, ramsey/uuid, PDO (SQLite), Phinx (schema-
-migraties, `db/migrations/`) en plain-PHP templates (`PhpTemplateEngine`).
+migraties, `db/migrations/`) en Twig-templates (`TwigTemplateEngine`, `resources/views/*.twig`).
 
 - Namespace root: `TynkaControlCenter\` → `src/`
 - PHP 8.2+ · PHPStan level 9 · PHP_CodeSniffer · PHPUnit 12
@@ -33,8 +33,9 @@ Bounded contexts (doelstructuur):
   `Locale`, `Avatar`, `Translator`).
 
 Gedeelde technische laag: `src/Config/` (AppConfig), `src/Infrastructure/Templating/`
-(port `TemplateEngine` + adapter `PhpTemplateEngine`; controllers hangen af van de port,
-Twig-klaar). Front controller + bedrading: `public/index.php`.
+(port `TemplateEngine` + adapter `TwigTemplateEngine`; controllers hangen af van de port).
+Templates in `resources/views/` (`base.html.twig` + blocks; `lang`/assets via de presentatielaag,
+niet via een domein-poort). Front controller + bedrading: `public/index.php`.
 
 ## Migratiestatus (in uitvoering)
 
@@ -62,12 +63,11 @@ staan tijdelijk náást elkaar. **Nog op te schonen / weg te werken:**
   DTO's/views → generics op collecties (`array<int, CheckInData>`).
 - **phpcs:** vastgelegd op **PSR-12** (`phpcs.xml.dist`, voorheen viel het terug op PEAR);
   26 pre-existing auto-fixes staan nog open (`composer php:fix`, eigen chore-commit).
-- `edit()`-route blijft geparkeerd/kapot: de actie is wél al omgezet naar
-  `Request → Response`, maar de body draagt nog 6 pre-existing phpstan-errors (verouderde
-  `GetCheckInByIdQuery`-signatuur, `$checkIn->uuid`, `render(path:)`,
-  `getAllCheckInActivitiesHandler->handle()` zonder `$query`). Fixen zodra de rij→DTO-mapping
-  gecentraliseerd is; **verhuis daarbij `getHtmlLang()`** van de `Translator`-poort/-adapter
-  naar de **presentatielaag** (presentatie-formattering hoort niet op een domein-poort).
+- ~~`edit()`-route geparkeerd/kapot~~ **opgelost (bij de Twig-flip):** de actie is
+  `Request → Response` met correcte `GetCheckInByIdQuery(id, locale)`, een `null`→404-guard,
+  de ontbrekende `GetAllCheckInActivitiesQuery` en positionele `render()`. `getHtmlLang()` is
+  van de `Translator`-poort/-adapter **verwijderd** — het `lang`-attribuut komt nu uit de
+  presentatielaag (Twig-global `app_locale` in `base.html.twig`).
 
 **Fase A afgerond (index-pagina):** debug-cruft (`var_dump`/`die()`/dode code) verwijderd,
 `index()` herleid tot één render, en de leeskant leest via een **optie-lijst read-model**

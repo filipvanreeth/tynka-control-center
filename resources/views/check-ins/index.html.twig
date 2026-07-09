@@ -21,7 +21,7 @@
         </div>
 
         <div id="checkin-form-container" class="hidden">
-            {% include 'components/check-in-form.html.twig' with { form: form, flash: flash } only %}
+            {% include 'components/check-in-form.html.twig' with { form: view.form, flash: view.flash } only %}
         </div>
 
         <div class="mt-12 mb-4">
@@ -36,10 +36,10 @@
         </div>
 
         <div class="grid gap-4 mt-4">
-            {% for checkIn in checkIns %}
+            {% for checkIn in view.checkIns %}
                 {% include 'components/check-in-card.html.twig' with { checkIn: checkIn, editLink: 'checkin/' ~ checkIn.id ~ '/edit' } only %}
             {% endfor %}
-            <div class="mx-auto text-center text-gray-400 bg-gray-200 p-1 px-2 rounded text-xs leading-normal">Total check-ins: {{ totalCheckIns }}</div>
+            <div class="mx-auto text-center text-gray-400 bg-gray-200 p-1 px-2 rounded text-xs leading-normal">Total check-ins: {{ view.totalCheckIns }}</div>
         </div>
 
         <div class="mt-6 border-t border-gray-200 pt-6">
@@ -51,12 +51,12 @@
         </div>
 
         <div class="grid grid-cols-3 gap-2">
-            {% for stat in checkInActivityStats %}
+            {% for stat in view.checkInActivityStats %}
                 {% include 'components/check-in-activity-stat.html.twig' with { total: stat.total, label: stat.label, colors: stat.colors } only %}
             {% endfor %}
         </div>
 
-        {% include 'components/top-handlers.html.twig' with { topHandlers: topHandlers } only %}
+        {% include 'components/top-handlers.html.twig' with { topHandlers: view.topHandlers } only %}
     </div>
 </div>
 {% endblock %}
@@ -66,7 +66,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const addButton = document.getElementById('add-checkin-btn');
     const formContainer = document.getElementById('checkin-form-container');
-    const shouldOpenOnLoad = {{ (flash and flash.type == 'error') ? 'true' : 'false' }};
+    const shouldOpenOnLoad = {{ (view.flash and view.flash.type == 'error') ? 'true' : 'false' }};
 
     if (!addButton || !formContainer) return;
 

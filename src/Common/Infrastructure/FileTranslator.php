@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace TynkaControlCenter\Common\Infrastructure;
@@ -34,18 +35,6 @@ final class FileTranslator implements Translator
         return $fallbackTranslation ?? $key;
     }
 
-    public function getLocale(): string
-    {
-        return $this->defaultLocale;
-    }
-
-    public function getHtmlLang(?string $locale = null): string
-    {
-        $activeLocale = $locale ?? $this->defaultLocale;
-
-        return str_replace('_', '-', $activeLocale);
-    }
-
     /**
      * Summary of loadCatalogue
      * @param string $locale
@@ -72,7 +61,7 @@ final class FileTranslator implements Translator
         return $this->catalogueCache[$locale];
     }
 
-    /** 
+    /**
      * @param array<string, mixed> $catalogue The catalogue with translations.
      * @param string $key Key to check.
      * @return string|null Returns the value as a string or null if no string.

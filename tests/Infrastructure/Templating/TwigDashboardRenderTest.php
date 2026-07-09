@@ -11,6 +11,7 @@ use TynkaControlCenter\CheckIn\Application\Query\CheckInActivityCategoryData;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInActivityData;
 use TynkaControlCenter\CheckIn\Application\Query\CheckInData;
 use TynkaControlCenter\CheckIn\Presentation\CheckInFormView;
+use TynkaControlCenter\CheckIn\Presentation\CheckInIndexView;
 use TynkaControlCenter\Handler\Application\Query\HandlerData;
 use TynkaControlCenter\Handler\Application\Query\TopHandlerData;
 use TynkaControlCenter\Infrastructure\Templating\TwigTemplateEngine;
@@ -29,14 +30,16 @@ final class TwigDashboardRenderTest extends TestCase
         $peed = new CheckInActivityData('Peed', 'peed', $walking);
         $snack = new CheckInActivityData('Snack', 'snack', $food);
 
-        $html = $this->engine()->render('check-ins/index', [
-            'form' => new CheckInFormView('/checkin', [$handler], [$peed, $snack], null),
-            'checkIns' => [new CheckInData('uuid-1', $handler, [$peed], '2020-01-15 08:00')],
-            'checkInActivityStats' => [['total' => 3, 'label' => 'Peed', 'colors' => 'border-opal-800']],
-            'topHandlers' => [new TopHandlerData($handler, 5)],
-            'totalCheckIns' => 1,
-            'flash' => null,
-        ]);
+        $view = new CheckInIndexView(
+            form: new CheckInFormView('/checkin', [$handler], [$peed, $snack], null),
+            checkIns: [new CheckInData('uuid-1', $handler, [$peed], '2020-01-15 08:00')],
+            checkInActivityStats: [['total' => 3, 'label' => 'Peed', 'colors' => 'border-opal-800']],
+            topHandlers: [new TopHandlerData($handler, 5)],
+            totalCheckIns: 1,
+            flash: null,
+        );
+
+        $html = $this->engine()->render('check-ins/index', ['view' => $view]);
 
         self::assertStringContainsString('<html lang="en">', $html);
         self::assertStringContainsString('Filip', $html);

@@ -10,16 +10,15 @@ use Psr\Http\Message\ServerRequestInterface;
 use TynkaControlCenter\CheckIn\Application\Command\RecordCheckInHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInActivitiesQuery;
-use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsHandler;
-use TynkaControlCenter\CheckIn\Application\Query\GetAllCheckInsQuery;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdHandler;
 use TynkaControlCenter\CheckIn\Application\Query\GetCheckInByIdQuery;
+use TynkaControlCenter\CheckIn\Application\Query\GetCheckInDashboardHandler;
+use TynkaControlCenter\CheckIn\Application\Query\GetCheckInDashboardQuery;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivity;
 use TynkaControlCenter\CheckIn\Domain\CheckInActivityRepository;
 use TynkaControlCenter\Common\Domain\Translator;
 use TynkaControlCenter\Config\AppConfig;
 use TynkaControlCenter\Handler\Application\Query\GetAllHandlersHandler;
-use TynkaControlCenter\Handler\Application\Query\GetTopHandlersHandler;
 use TynkaControlCenter\Infrastructure\Http\Session;
 use TynkaControlCenter\Infrastructure\Templating\TemplateEngine;
 
@@ -39,8 +38,7 @@ class CheckInController
         public readonly GetCheckInByIdHandler $getCheckInHandler,
         public readonly GetAllHandlersHandler $getAllHandlersHandler,
         public readonly GetAllCheckInActivitiesHandler $getAllCheckInActivitiesHandler,
-        public readonly GetTopHandlersHandler $getTopHandlersHandler,
-        private readonly GetAllCheckInsHandler $getAllCheckInsHandler,
+        private readonly GetCheckInDashboardHandler $dashboard,
         private readonly Session $session,
         private readonly CheckInActivityRepository $activityRepository,
     ) {
@@ -91,62 +89,53 @@ class CheckInController
             ? $this->session->get('locale')
             : 'en';
 
-        $checkInForm = new CheckInFormView(
-            action: "/checkin",
-            handlers: $this->getAllHandlersHandler->handle(),
-            activities: $this->getAllCheckInActivitiesHandler->handle(
-                new GetAllCheckInActivitiesQuery(locale: $locale)
+        $dashboard = $this->dashboard->handle(new GetCheckInDashboardQuery($locale));
+
+        $view = new CheckInIndexView(
+            form: new CheckInFormView(
+                action: "/checkin",
+                handlers: $dashboard->handlers,
+                activities: $dashboard->activities,
+                data: null,
             ),
-            data: null,
-        );
-
-        $allCheckIns = $this->getAllCheckInsHandler->handle(
-            new GetAllCheckInsQuery(locale: $locale)
-        );
-
-        $indexModel = new CheckInIndexView(
-            form: $checkInForm,
-            checkIns: $allCheckIns->checkIns,
-            checkInActivityStats: [],
-            topHandlers: $this->getTopHandlersHandler->handle(),
-            totalCheckIns: $allCheckIns->total,
+            checkIns: $dashboard->checkIns,
+            checkInActivityStats: $dashboard->activityStats,
+            topHandlers: $dashboard->topHandlers,
+            totalCheckIns: $dashboard->totalCheckIns,
             flash: $this->session->pullFlash(),
         );
 
-        $html = $this->viewRenderer->render("check-ins/index", [
-            "form" => $indexModel->form,
-            "checkIns" => $indexModel->checkIns,
-            "checkInActivities" => $indexModel->form->activities,
-            "checkInActivityStats" => $indexModel->checkInActivityStats,
-            "topHandlers" => $indexModel->topHandlers,
-            "totalCheckIns" => $indexModel->totalCheckIns,
-            "flash" => $indexModel->flash,
-        ]);
-
-        return new Response(200, [], $html);
+        return new Response(200, [], $this->viewRenderer->render('check-ins/index', [
+            'view' => $view,
+        ]));
     }
 
     public function edit(ServerRequestInterface $request): ResponseInterface
     {
+        $locale = \is_string($this->session->get('locale'))
+            ? $this->session->get('locale')
+            : 'en';
+
         $checkIn = $this->getCheckInHandler->handle(
-            new GetCheckInByIdQuery((string) $request->getAttribute('id')),
+            new GetCheckInByIdQuery((string) $request->getAttribute('id'), $locale),
         );
+
+        if ($checkIn === null) {
+            return new Response(404);
+        }
 
         $formData = new CheckInFormView(
             action: "checkin/{$checkIn->id}/edit",
             handlers: $this->getAllHandlersHandler->handle(),
-            activities: $this->getAllCheckInActivitiesHandler->handle(),
+            activities: $this->getAllCheckInActivitiesHandler->handle(
+                new GetAllCheckInActivitiesQuery(locale: $locale)
+            ),
             data: $checkIn,
         );
 
-        $html = $this->viewRenderer->render(
-            template: "check-ins/edit",
-            data: [
-                "htmlLang" => $this->translator->getHtmlLang(),
-                "form" => $formData,
-                "viewRenderer" => $this->viewRenderer,
-            ],
-        );
+        $html = $this->viewRenderer->render('check-ins/edit', [
+            'form' => $formData,
+        ]);
 
         return new Response(200, [], $html);
     }
